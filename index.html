@@ -158,10 +158,10 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
       <!-- SAVE FORMATION FOR THIS BOWLER -->
       <div class="ctrl-sec">
         <h3>Formations for this bowler</h3>
-        <div style="display:flex;gap:6px;margin-bottom:8px;">
-          <input type="text" id="save-name" placeholder="Formation name…" style="flex:1;min-width:0;">
-          <button onclick="saveFormation()" title="Save" style="font-family:'DM Sans',sans-serif;font-size:13px;padding:6px 10px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;flex-shrink:0;"><i class="ti ti-device-floppy"></i></button>
-        </div>
+        <input type="text" id="save-name" placeholder="Formation name…" style="width:100%;margin-bottom:7px;">
+        <button onclick="saveFormation()" style="font-family:'DM Sans',sans-serif;font-size:13px;padding:8px;border-radius:var(--r);border:1px solid var(--accent-dark);background:var(--accent);color:#1a1a00;font-weight:500;cursor:pointer;width:100%;margin-bottom:10px;">
+          <i class="ti ti-device-floppy" style="vertical-align:-2px;margin-right:5px;font-size:14px;"></i>Save formation
+        </button>
         <div id="saved-tags"></div>
       </div>
 
@@ -747,6 +747,9 @@ function endDrag(){
 function setStatus(msg){document.getElementById('status-bar').textContent=msg;}
 
 loadData();restoreSelection();
+
+// Save formation on Enter key
+document.getElementById('save-name').addEventListener('keydown',e=>{if(e.key==='Enter')saveFormation();});
 
 // Prevent iOS Safari from scrolling the page during any drag
 document.addEventListener('touchmove',function(e){
