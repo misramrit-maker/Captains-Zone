@@ -668,22 +668,43 @@ function renderFormationCards(){
   }
 
   keys.forEach(name=>{
+    const isActive=activeFormationName===name;
     const card=document.createElement('div');
-    card.className='formation-card'+(activeFormationName===name?' active-form':'');
-    card.innerHTML=
-      `<i class="ti ti-layout-distribute-horizontal" style="font-size:15px;color:var(--accent);flex-shrink:0;"></i>`+
-      `<span class="fc-name">${name}</span>`+
-      `<button class="fc-del" title="Delete" onclick="event.stopPropagation();deleteFormation('${name}')">✕</button>`;
+    card.className='formation-card'+(isActive?' active-form':'');
+
+    if(isActive){
+      // Active card: name + Resave + Delete
+      card.innerHTML=
+        `<i class="ti ti-layout-distribute-horizontal" style="font-size:15px;color:var(--accent);flex-shrink:0;"></i>`+
+        `<span class="fc-name">${name}</span>`+
+        `<button title="Resave current field as '${name}'" onclick="event.stopPropagation();resaveFormation('${name}')" style="font-family:'DM Sans',sans-serif;font-size:10px;padding:3px 7px;border-radius:4px;border:1px solid var(--accent-dark);background:var(--accent);color:#1a1a00;font-weight:600;cursor:pointer;flex-shrink:0;white-space:nowrap;">↺ Resave</button>`+
+        `<button class="fc-del" title="Delete" onclick="event.stopPropagation();deleteFormation('${name}')">✕</button>`;
+    } else {
+      card.innerHTML=
+        `<i class="ti ti-layout-distribute-horizontal" style="font-size:15px;color:var(--accent);flex-shrink:0;"></i>`+
+        `<span class="fc-name">${name}</span>`+
+        `<button class="fc-del" title="Delete" onclick="event.stopPropagation();deleteFormation('${name}')">✕</button>`;
+    }
     card.addEventListener('click',()=>loadFormation(name));
     wrap.appendChild(card);
   });
 }
 
+async function resaveFormation(name){
+  if(!currentBowlerId||!name) return;
+  if(!formations[currentBowlerId]) formations[currentBowlerId]={};
+  formations[currentBowlerId][name]=JSON.parse(JSON.stringify(fielders));
+  activeFormationName=name;
+  await persistFormations();
+  renderFormationCards();
+  const bowlerName=players.find(p=>p.id===currentBowlerId)?.name||'';
+  setStatus('"'+name+'" updated for '+bowlerName+'.');
+}
+
 // Keep renderSavedTags as an alias so Firebase listener still works
-function renderSavedTags(){ renderFormationCards(); }
+function renderSavedTags(){ renderFormationCards(); renderHomeFormations(); }
 
 function setBowl(v){
-  bowlType=v;
   document.getElementById('bowl-fast').classList.toggle('active',v==='fast');
   document.getElementById('bowl-spin').classList.toggle('active',v==='spin');
 }
@@ -700,10 +721,18 @@ function applyDefault(){
   const keys=DEFAULTS[bowlType][batHand];
   const POS=getPOS(batHand);
   const nf={};
-  players.forEach((p,i)=>{const k=keys[i];if(k&&POS[k])nf[p.id]={x:POS[k].cx,y:POS[k].cy};});
+  // Place all players except the selected bowler as fielders
+  const fielderPlayers=players.filter(p=>p.id!==currentBowlerId);
+  let posIdx=0;
+  fielderPlayers.forEach(p=>{
+    // Skip WK position (index 0) only if there's no bowler selected — WK always fields
+    const k=keys[posIdx];
+    if(k&&POS[k]){nf[p.id]={x:POS[k].cx,y:POS[k].cy};}
+    posIdx++;
+  });
   fielders=nf;persist();renderFielders();renderFielderList();
   const bName=currentBowlerId?players.find(p=>p.id===currentBowlerId)?.name:'';
-  setStatus('✓ '+(bowlType==='fast'?'Fast':'Spin')+' field vs '+(batHand==='rh'?'RH':'LH')+' bat'+(bName?' for '+bName:'')+'. Drag to fine-tune.');
+  setStatus('✓ '+(bowlType==='fast'?'Fast':'Spin')+' field vs '+(batHand==='rh'?'RH':'LH')+' bat'+(bName?' — '+bName+' is bowling':'')+'. Drag to fine-tune.');
 }
 
 // ── PER-BOWLER FORMATIONS ─────────────────────────────────────────────────────
@@ -727,8 +756,11 @@ function loadFormation(name){
   if(!currentBowlerId||!formations[currentBowlerId]||!formations[currentBowlerId][name])return;
   activeFormationName=name;
   fielders=JSON.parse(JSON.stringify(formations[currentBowlerId][name]));
+  // Pre-fill the save input so captain can resave after editing
+  const inp=document.getElementById('save-name');
+  if(inp) inp.value=name;
   persist();renderFielders();renderFielderList();renderFormationCards();
-  setStatus('"'+name+'" loaded. Drag to adjust.');
+  setStatus('"'+name+'" loaded. Drag to adjust, then tap Resave to update.');
 }
 
 async function deleteFormation(name){
@@ -817,8 +849,35 @@ function buildField(){
 // ── RENDER FIELDERS — clean circles, easy to drag ────────────────────────────
 function renderFielders(){
   const layer=svg.getElementById('fl');if(!layer)return;layer.innerHTML='';
+
+  // Draw the bowler as a special non-draggable gold marker at the bowling crease
+  if(currentBowlerId){
+    const bowler=players.find(x=>x.id===currentBowlerId);
+    if(bowler){
+      const bx=250, by=193; // bowling crease position (top of pitch)
+      const bg=mksvg('g',{transform:`translate(${bx},${by})`});
+      // Pulsing gold ring
+      bg.appendChild(mksvg('circle',{r:'20',fill:'none',stroke:'#e8c84a','stroke-width':'2','stroke-dasharray':'5,3','opacity':'0.8'}));
+      // Gold fill circle
+      bg.appendChild(mksvg('circle',{r:'15',fill:'#e8c84a',stroke:'#b89a20','stroke-width':'1.5'}));
+      // Cricket ball icon area
+      bg.appendChild(mksvg('circle',{r:'7',fill:'#c0392b','stroke':'rgba(0,0,0,0.3)','stroke-width':'1'}));
+      bg.appendChild(mksvg('path',{d:'M -7,0 Q 0,-3 7,0',fill:'none',stroke:'#fff','stroke-width':'0.8'}));
+      bg.appendChild(mksvg('path',{d:'M -7,0 Q 0,3 7,0',fill:'none',stroke:'#fff','stroke-width':'0.8'}));
+      // Name label
+      const nm=bowler.name.split(' ')[0];
+      const lbl=mksvg('text',{'text-anchor':'middle',y:'27','font-size':'8','font-weight':'600',fill:'#e8c84a','font-family':'DM Sans,sans-serif','paint-order':'stroke',stroke:'rgba(0,0,0,0.8)','stroke-width':'2.5','stroke-linejoin':'round'});
+      lbl.textContent=(nm.length>9?nm.substring(0,8)+'…':nm)+' 🏏';
+      bg.appendChild(lbl);
+      layer.appendChild(bg);
+    }
+  }
+
+  // Draw all fielders (bowler is excluded from fielders map)
   Object.entries(fielders).forEach(([pid,pos])=>{
     pid=parseInt(pid);
+    // Skip if this is the bowler
+    if(pid===currentBowlerId) return;
     const p=players.find(x=>x.id===pid);if(!p)return;
     const color=getColor(pid),isSel=selected===pid;
     const g=mksvg('g',{'class':'fielder','data-id':pid,cursor:'grab',transform:`translate(${pos.x},${pos.y})`});
@@ -976,6 +1035,7 @@ window.setBat         = setBat;
 window.applyDefault   = applyDefault;
 window.onBowlerChange = onBowlerChange;
 window.saveFormation  = saveFormation;
+window.resaveFormation= resaveFormation;
 window.loadFormation  = loadFormation;
 window.deleteFormation= deleteFormation;
 window.renderFormationCards=renderFormationCards;
