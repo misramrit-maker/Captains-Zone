@@ -52,7 +52,7 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
 .next-btn:disabled{opacity:.35;cursor:not-allowed;}
 .field-page{display:flex;flex:1;overflow:hidden;}
 .field-panel{flex:1;display:flex;align-items:center;justify-content:center;padding:12px;background:var(--bg);}
-#field-svg{width:100%;max-width:min(calc(100vh - 130px),540px);aspect-ratio:1;user-select:none;filter:drop-shadow(0 0 28px rgba(42,122,42,.28));}
+#field-svg{width:100%;max-width:min(calc(100vh - 130px),540px);aspect-ratio:1;user-select:none;touch-action:none;filter:drop-shadow(0 0 28px rgba(42,122,42,.28));}
 .controls{width:224px;flex-shrink:0;display:flex;flex-direction:column;background:var(--surface);border-left:1px solid var(--border);overflow:hidden;}
 .ctrl-sec{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
 .ctrl-sec h3{font-size:10px;font-weight:500;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px;}
@@ -479,156 +479,37 @@ function buildField(){
   // touchstart is attached per-fielder in renderFielders() for instant drag without scroll
 }
 
-// ── RENDER FIELDERS — 3D professional player figures ──────────────────────────
-function ensureDefs(){
-  let defs=svg.querySelector('defs');
-  if(defs) return defs;
-  defs=mksvg('defs');
-  svg.insertBefore(defs,svg.firstChild);
-  return defs;
-}
-
-function ensurePlayerGradients(color,id){
-  const defs=ensureDefs();
-  const gid='pg'+id, sid='ps'+id, kid='pk'+id;
-  if(defs.querySelector('#'+gid)) return;
-
-  // Lighten colour for highlight
-  function lighten(hex,amt){
-    let c=parseInt(hex.replace('#',''),16);
-    let r=Math.min(255,((c>>16)&255)+amt);
-    let g=Math.min(255,((c>>8)&255)+amt);
-    let b=Math.min(255,(c&255)+amt);
-    return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
-  }
-  function darken(hex,amt){return lighten(hex,-amt);}
-  const light=lighten(color,70), dark=darken(color,40);
-
-  // Jersey radial gradient (3D sphere-like)
-  const jerseyGrad=mksvg('radialGradient',{id:gid,cx:'38%',cy:'30%',r:'65%','fx':'38%','fy':'30%'});
-  jerseyGrad.appendChild(mksvg('stop',{'offset':'0%','stop-color':light,'stop-opacity':'1'}));
-  jerseyGrad.appendChild(mksvg('stop',{'offset':'55%','stop-color':color,'stop-opacity':'1'}));
-  jerseyGrad.appendChild(mksvg('stop',{'offset':'100%','stop-color':dark,'stop-opacity':'1'}));
-  defs.appendChild(jerseyGrad);
-
-  // Head radial gradient (skin tone shaded)
-  const headGrad=mksvg('radialGradient',{id:sid,cx:'40%',cy:'32%',r:'60%'});
-  headGrad.appendChild(mksvg('stop',{'offset':'0%','stop-color':'#f5d5b0'}));
-  headGrad.appendChild(mksvg('stop',{'offset':'100%','stop-color':'#c8955a'}));
-  defs.appendChild(headGrad);
-
-  // Helmet gradient (white helmet)
-  const helmGrad=mksvg('radialGradient',{id:kid,cx:'35%',cy:'28%',r:'65%'});
-  helmGrad.appendChild(mksvg('stop',{'offset':'0%','stop-color':'#ffffff'}));
-  helmGrad.appendChild(mksvg('stop',{'offset':'100%','stop-color':'#aaaaaa'}));
-  defs.appendChild(helmGrad);
-}
-
-function ensureSharedDefs(){
-  const defs=ensureDefs();
-  if(defs.querySelector('#dropshadow')) return;
-
-  // Drop shadow filter
-  const filter=mksvg('filter',{id:'dropshadow',x:'-30%',y:'-20%',width:'160%',height:'160%'});
-  const fe1=mksvg('feDropShadow',{dx:'0',dy:'3',stdDeviation:'2.5','flood-color':'rgba(0,0,0,0.55)','flood-opacity':'1'});
-  filter.appendChild(fe1);
-  defs.appendChild(filter);
-
-  // Selection glow filter
-  const glow=mksvg('filter',{id:'selglow',x:'-40%',y:'-40%',width:'180%',height:'180%'});
-  const feBlur=mksvg('feGaussianBlur',{in:'SourceGraphic',stdDeviation:'3',result:'blur'});
-  const feMerge=mksvg('feMerge');
-  const n1=mksvg('feMergeNode',{in:'blur'});
-  const n2=mksvg('feMergeNode',{in:'SourceGraphic'});
-  feMerge.appendChild(n1); feMerge.appendChild(n2);
-  glow.appendChild(feBlur); glow.appendChild(feMerge);
-  defs.appendChild(glow);
-}
-
+// ── RENDER FIELDERS — clean circles, easy to drag ────────────────────────────
 function renderFielders(){
   const layer=svg.getElementById('fl');if(!layer)return;layer.innerHTML='';
-  ensureSharedDefs();
-
   Object.entries(fielders).forEach(([pid,pos])=>{
     pid=parseInt(pid);
     const p=players.find(x=>x.id===pid);if(!p)return;
-    const color=getColor(pid), isSel=selected===pid, isDrag=dragging===pid;
+    const color=getColor(pid),isSel=selected===pid;
+    const g=mksvg('g',{'class':'fielder','data-id':pid,cursor:'grab',transform:`translate(${pos.x},${pos.y})`});
 
-    ensurePlayerGradients(color,pid);
-    const gid='pg'+pid, sid='ps'+pid, kid='pk'+pid;
+    // Invisible large hit-area circle — makes touch easier on phone
+    g.appendChild(mksvg('circle',{r:'22',fill:'transparent',stroke:'none'}));
 
-    const g=mksvg('g',{
-      'class':'fielder','data-id':pid,
-      cursor:isDrag?'grabbing':'grab',
-      transform:`translate(${pos.x},${pos.y})`,
-      filter:'url(#dropshadow)',
-    });
+    // Gold selection ring
+    if(isSel) g.appendChild(mksvg('circle',{r:'20',fill:'none',stroke:'#e8c84a','stroke-width':'2.5','stroke-dasharray':'4,3'}));
 
-    // ── Ground shadow (oval under feet)
-    g.appendChild(mksvg('ellipse',{cx:'0',cy:'14',rx:'11',ry:'4',fill:'rgba(0,0,0,0.35)'}));
+    // Main coloured circle
+    g.appendChild(mksvg('circle',{r:'15',fill:color,stroke:'rgba(0,0,0,0.35)','stroke-width':'1.5'}));
 
-    // ── Selection ring (pulsing dashed gold halo)
-    if(isSel){
-      const halo=mksvg('circle',{r:'22',fill:'none',stroke:'#e8c84a','stroke-width':'2.5','stroke-dasharray':'5,3'});
-      g.appendChild(halo);
-    }
+    // Subtle top-left shine
+    g.appendChild(mksvg('circle',{r:'8',cx:'-4',cy:'-4',fill:'rgba(255,255,255,0.15)'}));
 
-    // ── BODY / JERSEY
-    // Torso: rounded rectangle shape via path
-    // Body from y=2 to y=14, width ~14
-    g.appendChild(mksvg('path',{
-      d:'M -7,2 Q -8,-2 0,-3 Q 8,-2 7,2 L 8,14 Q 0,16 -8,14 Z',
-      fill:`url(#${gid})`,
-      stroke:'rgba(0,0,0,0.3)','stroke-width':'0.5'
-    }));
+    // Initials
+    g.appendChild(mksvg('text',{'text-anchor':'middle','dominant-baseline':'central','font-size':'9','font-weight':'600',fill:'#fff','font-family':'DM Sans,sans-serif'},initials(p.name)));
 
-    // Jersey number / kit stripe (horizontal stripe on chest)
-    g.appendChild(mksvg('line',{x1:'-7',y1:'4',x2:'7',y2:'4',stroke:'rgba(255,255,255,0.25)','stroke-width':'1.2'}));
+    // Name below with dark outline so it reads on any grass colour
+    const nm=p.name.split(' ')[0];
+    const lbl=mksvg('text',{'text-anchor':'middle',y:'27','font-size':'8','font-weight':'500',fill:'#fff','font-family':'DM Sans,sans-serif','paint-order':'stroke',stroke:'rgba(0,0,0,0.75)','stroke-width':'2.5','stroke-linejoin':'round'});
+    lbl.textContent=nm.length>9?nm.substring(0,8)+'…':nm;
+    g.appendChild(lbl);
 
-    // Arms (left and right)
-    g.appendChild(mksvg('path',{d:'M -7,3 Q -12,6 -10,11',stroke:`url(#${gid})`,'stroke-width':'4','stroke-linecap':'round',fill:'none'}));
-    g.appendChild(mksvg('path',{d:'M 7,3 Q 12,6 10,11',stroke:`url(#${gid})`,'stroke-width':'4','stroke-linecap':'round',fill:'none'}));
-
-    // Gloves / hands (small circles at arm ends)
-    g.appendChild(mksvg('circle',{cx:'-10',cy:'11',r:'2.5',fill:'#f5d5b0',stroke:'rgba(0,0,0,.25)','stroke-width':'0.5'}));
-    g.appendChild(mksvg('circle',{cx:'10',cy:'11',r:'2.5',fill:'#f5d5b0',stroke:'rgba(0,0,0,.25)','stroke-width':'0.5'}));
-
-    // Legs
-    g.appendChild(mksvg('path',{d:'M -3,13 L -4,19 L -2,19',stroke:'#ffffff','stroke-width':'3.5','stroke-linecap':'round','stroke-linejoin':'round',fill:'none','stroke-opacity':'0.9'}));
-    g.appendChild(mksvg('path',{d:'M 3,13 L 4,19 L 2,19',stroke:'#ffffff','stroke-width':'3.5','stroke-linecap':'round','stroke-linejoin':'round',fill:'none','stroke-opacity':'0.9'}));
-
-    // ── NECK
-    g.appendChild(mksvg('rect',{x:'-2.5',y:'-6',width:'5',height:'5',rx:'1',fill:'#c8955a'}));
-
-    // ── HEAD (face)
-    g.appendChild(mksvg('circle',{cx:'0',cy:'-11',r:'7.5',fill:`url(#${sid})`,stroke:'rgba(0,0,0,0.3)','stroke-width':'0.5'}));
-
-    // ── HELMET
-    // Dome
-    g.appendChild(mksvg('path',{
-      d:'M -7,-11 Q -7,-21 0,-22 Q 7,-21 7,-11 Z',
-      fill:`url(#${kid})`,stroke:'rgba(0,0,0,0.3)','stroke-width':'0.5'
-    }));
-    // Visor / peak (small rectangle jutting out from front)
-    const vx=color; // visor matches jersey colour
-    g.appendChild(mksvg('rect',{x:'-8',y:'-14',width:'16',height:'3',rx:'1',fill:`url(#${gid})`,stroke:'rgba(0,0,0,0.2)','stroke-width':'0.4'}));
-    // Helmet grill lines (face guard)
-    g.appendChild(mksvg('line',{x1:'-5',y1:'-11',x2:'-5',y2:'-7',stroke:'rgba(0,0,0,0.35)','stroke-width':'0.8'}));
-    g.appendChild(mksvg('line',{x1:'-3',y1:'-12',x2:'-3',y2:'-7',stroke:'rgba(0,0,0,0.35)','stroke-width':'0.8'}));
-    g.appendChild(mksvg('line',{x1:'-1',y1:'-12',x2:'-1',y2:'-7',stroke:'rgba(0,0,0,0.35)','stroke-width':'0.8'}));
-    g.appendChild(mksvg('line',{x1:'1',y1:'-12',x2:'1',y2:'-7',stroke:'rgba(0,0,0,0.35)','stroke-width':'0.8'}));
-    g.appendChild(mksvg('line',{x1:'3',y1:'-12',x2:'3',y2:'-7',stroke:'rgba(0,0,0,0.35)','stroke-width':'0.8'}));
-    g.appendChild(mksvg('line',{x1:'5',y1:'-11',x2:'5',y2:'-7',stroke:'rgba(0,0,0,0.35)','stroke-width':'0.8'}));
-    // Horizontal bar across grill
-    g.appendChild(mksvg('line',{x1:'-5',y1:'-9',x2:'5',y2:'-9',stroke:'rgba(0,0,0,0.35)','stroke-width':'0.8'}));
-
-    // ── NAME LABEL below figure
-    const sn=p.name.split(' ')[0]; // first name only
-    const label=mksvg('text',{'text-anchor':'middle',y:'28','font-size':'7','font-weight':'500',fill:'rgba(255,255,255,0.92)','font-family':'DM Sans,sans-serif','paint-order':'stroke','stroke':'rgba(0,0,0,0.7)','stroke-width':'2.5','stroke-linejoin':'round'});
-    label.textContent=sn.length>9?sn.substring(0,8)+'…':sn;
-    g.appendChild(label);
-
-    // Touch drag
+    // Attach touch handler directly — fires immediately, no scroll delay
     g.addEventListener('touchstart',onTS,{passive:false});
     layer.appendChild(g);
   });
@@ -649,36 +530,33 @@ function renderFielderList(){
   });
 }
 
-// ── DRAG — pick up and move immediately, no pre-selection needed ───────────────
-function svgPt(e){
+// ── DRAG ─────────────────────────────────────────────────────────────────────
+// Convert a client pixel coordinate to SVG viewBox coordinate
+function svgPt(clientX,clientY){
   const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;
-  const sx=vb.width/r.width,sy=vb.height/r.height;
-  const src=e.touches?e.touches[0]:e;
-  return{x:(src.clientX-r.left)*sx,y:(src.clientY-r.top)*sy};
+  return{x:(clientX-r.left)*(vb.width/r.width),y:(clientY-r.top)*(vb.height/r.height)};
 }
 
-// Mouse
+// Mouse drag — listens on SVG element
 function onMD(e){
   const g=e.target.closest('.fielder');
-  if(g){
-    e.preventDefault();
-    e.stopPropagation();
-    startDrag(g,svgPt(e));
-    window.addEventListener('mousemove',onMM);
-    window.addEventListener('mouseup',onMU);
-  }else{
-    selected=null;renderFielders();
-  }
+  if(!g){selected=null;renderFielders();return;}
+  e.preventDefault();
+  startDrag(g,svgPt(e.clientX,e.clientY));
+  window.addEventListener('mousemove',onMM);
+  window.addEventListener('mouseup',onMU);
 }
 
-// Touch — attached directly to each fielder element so no hit-test needed
+// Touch drag — listener attached directly to each fielder <g> in renderFielders()
+// Using changedTouches[0] instead of touches[0] for reliability across browsers
 function onTS(e){
-  // e.currentTarget is the fielder <g> element
-  e.preventDefault();
+  e.preventDefault();       // block scroll and long-press menu
   e.stopPropagation();
-  startDrag(e.currentTarget, svgPt(e));
+  const t=e.changedTouches[0];
+  startDrag(e.currentTarget,svgPt(t.clientX,t.clientY));
   window.addEventListener('touchmove',onTM,{passive:false});
   window.addEventListener('touchend',onTE);
+  window.addEventListener('touchcancel',onTE);
 }
 
 function startDrag(g,pt){
@@ -686,19 +564,22 @@ function startDrag(g,pt){
   selected=dragging;
   const pos=fielders[dragging];
   dragOffset={x:pos.x-pt.x,y:pos.y-pt.y};
-  // Show grabbing cursor immediately
-  g.setAttribute('cursor','grabbing');
   renderFielders();
   setStatus('Moving '+players.find(p=>p.id===dragging)?.name+'…');
 }
 
-function onMM(e){if(dragging)moveDrag(svgPt(e));}
-function onTM(e){e.preventDefault();if(dragging)moveDrag(svgPt(e));}
+function onMM(e){if(dragging)moveDrag(svgPt(e.clientX,e.clientY));}
+function onTM(e){
+  e.preventDefault();
+  if(dragging&&e.changedTouches.length){
+    const t=e.changedTouches[0];
+    moveDrag(svgPt(t.clientX,t.clientY));
+  }
+}
 
 function moveDrag(pt){
   if(!dragging)return;
   let nx=pt.x+dragOffset.x,ny=pt.y+dragOffset.y;
-  // Clamp inside boundary
   const dx=nx-250,dy=ny-250,dist=Math.hypot(dx,dy);
   if(dist>218){nx=250+dx/dist*218;ny=250+dy/dist*218;}
   fielders[dragging]={x:Math.round(nx),y:Math.round(ny)};
@@ -706,7 +587,7 @@ function moveDrag(pt){
 }
 
 function onMU(){endDrag();window.removeEventListener('mousemove',onMM);window.removeEventListener('mouseup',onMU);}
-function onTE(){endDrag();window.removeEventListener('touchmove',onTM);window.removeEventListener('touchend',onTE);}
+function onTE(){endDrag();window.removeEventListener('touchmove',onTM);window.removeEventListener('touchend',onTE);window.removeEventListener('touchcancel',onTE);}
 
 function endDrag(){
   if(!dragging)return;
@@ -717,31 +598,12 @@ function endDrag(){
     fielders[dragging]={x:snap.cx,y:snap.cy};
     setStatus(players.find(p=>p.id===dragging)?.name+' → '+snap.name);
   }else{
-    setStatus(players.find(p=>p.id===dragging)?.name+' repositioned.');
+    setStatus(players.find(p=>p.id===dragging)?.name+' moved.');
   }
   dragging=null;
   persist();renderFielders();renderFielderList();
 }
 
-// ── FORMATIONS ────────────────────────────────────────────────────────────────
-function saveFormation(){
-  const name=document.getElementById('save-name').value.trim();
-  if(!name){setStatus('Enter a name to save.');return;}
-  formations[name]=JSON.parse(JSON.stringify(fielders));document.getElementById('save-name').value='';
-  persist();renderSavedTags();setStatus('"'+name+'" saved.');
-}
-function loadFormation(name){if(!formations[name])return;fielders=JSON.parse(JSON.stringify(formations[name]));persist();renderFielders();renderFielderList();setStatus('"'+name+'" loaded.');}
-function deleteFormation(name){delete formations[name];persist();renderSavedTags();}
-function renderSavedTags(){
-  const wrap=document.getElementById('saved-tags');wrap.innerHTML='';
-  const keys=Object.keys(formations);
-  if(!keys.length){wrap.innerHTML='<span style="font-size:11px;color:var(--dim);">No saved formations.</span>';return;}
-  keys.forEach(name=>{
-    const tag=document.createElement('span');tag.className='saved-tag';
-    tag.innerHTML=name+' <span class="tag-x" onclick="event.stopPropagation();deleteFormation(\''+name+'\')">✕</span>';
-    tag.addEventListener('click',()=>loadFormation(name));wrap.appendChild(tag);
-  });
-}
 function setStatus(msg){document.getElementById('status-bar').textContent=msg;}
 
 loadData();restoreSelection();
