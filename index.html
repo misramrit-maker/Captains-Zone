@@ -125,6 +125,16 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
       <svg id="field-svg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
     <div class="controls">
+
+      <!-- BOWLER SELECT -->
+      <div class="ctrl-sec">
+        <h3>Bowler</h3>
+        <select id="bowler-select" onchange="onBowlerChange()" style="width:100%;font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 9px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text);outline:none;">
+          <option value="">— select bowler —</option>
+        </select>
+      </div>
+
+      <!-- BOWLER TYPE -->
       <div class="ctrl-sec">
         <h3>Bowler type</h3>
         <div class="seg">
@@ -132,21 +142,31 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
           <button class="seg-btn" id="bowl-spin" onclick="setBowl('spin')">Spin</button>
         </div>
       </div>
+
+      <!-- BATSMAN -->
       <div class="ctrl-sec">
         <h3>Batsman</h3>
         <div class="seg">
           <button class="seg-btn active" id="bat-rh" onclick="setBat('rh')">Right hand</button>
           <button class="seg-btn" id="bat-lh" onclick="setBat('lh')">Left hand</button>
         </div>
-        <button class="apply-btn" onclick="applyDefault()"><i class="ti ti-layout-grid" style="vertical-align:-2px;margin-right:4px;font-size:14px;"></i>Apply default field</button>
+        <button class="apply-btn" onclick="applyDefault()">
+          <i class="ti ti-layout-grid" style="vertical-align:-2px;margin-right:4px;font-size:14px;"></i>Apply default field
+        </button>
       </div>
-      <div class="save-row">
-        <input type="text" id="save-name" placeholder="Save formation as…">
-        <button onclick="saveFormation()" title="Save"><i class="ti ti-device-floppy"></i></button>
+
+      <!-- SAVE FORMATION FOR THIS BOWLER -->
+      <div class="ctrl-sec">
+        <h3>Formations for this bowler</h3>
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <input type="text" id="save-name" placeholder="Formation name…" style="flex:1;min-width:0;">
+          <button onclick="saveFormation()" title="Save" style="font-family:'DM Sans',sans-serif;font-size:13px;padding:6px 10px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;flex-shrink:0;"><i class="ti ti-device-floppy"></i></button>
+        </div>
+        <div id="saved-tags"></div>
       </div>
-      <div class="saved-tags" id="saved-tags"></div>
+
       <div class="fielder-list" id="fielder-list"></div>
-      <div id="status-bar">Pick bowler type &amp; batsman, then tap Apply.</div>
+      <div id="status-bar">Select a bowler, pick batsman type, then tap Apply.</div>
       <div class="back-link" onclick="goStep(1)">← Edit squad</div>
     </div>
   </div>
@@ -290,19 +310,38 @@ let players=[],fielders={},formations={},nextId=1;
 let bowlType='fast',batHand='rh';
 let selected=null,dragging=null,dragOffset={x:0,y:0};
 
-function persist(){try{localStorage.setItem('fc5_p',JSON.stringify(players));localStorage.setItem('fc5_f',JSON.stringify(fielders));localStorage.setItem('fc5_fm',JSON.stringify(formations));}catch(e){}}
+function persist(){
+  try{
+    localStorage.setItem('fc5_p',JSON.stringify(players));
+    localStorage.setItem('fc5_f',JSON.stringify(fielders));
+    // formations: { bowlerId: { name: fielders } }
+    localStorage.setItem('fc5_fm',JSON.stringify(formations));
+  }catch(e){}
+}
+
 function loadData(){
   try{
-    const p=localStorage.getItem('fc5_p');if(p){players=JSON.parse(p);nextId=Math.max(0,...players.map(x=>x.id))+1;}
+    const p=localStorage.getItem('fc5_p');
+    if(p){players=JSON.parse(p);nextId=Math.max(0,...players.map(x=>x.id))+1;}
     const f=localStorage.getItem('fc5_f');if(f)fielders=JSON.parse(f);
-    const fm=localStorage.getItem('fc5_fm');if(fm)formations=JSON.parse(fm);
+    const fm=localStorage.getItem('fc5_fm');
+    if(fm){
+      const raw=JSON.parse(fm);
+      // Migrate old flat structure { name: fielders } → new { bowlerId: { name: fielders } }
+      // Old structure has string keys that are formation names (not numeric bowler IDs)
+      const isOld=Object.keys(raw).length>0&&!Object.keys(raw).every(k=>!isNaN(k));
+      formations=isOld?{}:raw;
+    }
   }catch(e){}
 }
 
 function goStep(n){
   document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('active',i===n-1));
   document.querySelectorAll('.step-tab').forEach((t,i)=>{t.classList.toggle('active',i===n-1);t.classList.toggle('done',i<n-1);});
-  if(n===2){buildField();renderFielders();renderFielderList();renderSavedTags();}
+  if(n===2){
+    populateBowlerSelect();
+    buildField();renderFielders();renderFielderList();renderSavedTags();
+  }
 }
 
 // ── ATHLONE CC ROSTER ─────────────────────────────────────────────────────────
@@ -390,8 +429,53 @@ function restoreSelection(){
 }
 
 // ── CONTROLS ──────────────────────────────────────────────────────────────────
-function setBowl(v){bowlType=v;document.getElementById('bowl-fast').classList.toggle('active',v==='fast');document.getElementById('bowl-spin').classList.toggle('active',v==='spin');}
-function setBat(v){batHand=v;document.getElementById('bat-rh').classList.toggle('active',v==='rh');document.getElementById('bat-lh').classList.toggle('active',v==='lh');buildField();renderFielders();renderFielderList();}
+let currentBowlerId = null; // roster ID of the selected bowler
+
+function populateBowlerSelect(){
+  const sel=document.getElementById('bowler-select');
+  const prev=sel.value;
+  sel.innerHTML='<option value="">— select bowler —</option>';
+  players.forEach(p=>{
+    const opt=document.createElement('option');
+    opt.value=p.id;opt.textContent=p.name;
+    sel.appendChild(opt);
+  });
+  // Restore previous selection if still in squad
+  if(prev&&players.find(p=>p.id==prev)) sel.value=prev;
+}
+
+function onBowlerChange(){
+  const sel=document.getElementById('bowler-select');
+  currentBowlerId=sel.value?parseInt(sel.value):null;
+  // Load this bowler's last used formation if one exists
+  if(currentBowlerId){
+    const bowlerFormations=formations[currentBowlerId]||{};
+    const keys=Object.keys(bowlerFormations);
+    if(keys.length){
+      // Load the most recently saved formation for this bowler
+      const last=keys[keys.length-1];
+      fielders=JSON.parse(JSON.stringify(bowlerFormations[last]));
+      persist();renderFielders();renderFielderList();
+      setStatus(sel.options[sel.selectedIndex].text+' selected — "'+last+'" loaded.');
+    } else {
+      setStatus(sel.options[sel.selectedIndex].text+' selected. Apply a default field or drag to set up.');
+    }
+  }
+  renderSavedTags();
+}
+
+function setBowl(v){
+  bowlType=v;
+  document.getElementById('bowl-fast').classList.toggle('active',v==='fast');
+  document.getElementById('bowl-spin').classList.toggle('active',v==='spin');
+}
+
+function setBat(v){
+  batHand=v;
+  document.getElementById('bat-rh').classList.toggle('active',v==='rh');
+  document.getElementById('bat-lh').classList.toggle('active',v==='lh');
+  buildField();renderFielders();renderFielderList();
+}
 
 function applyDefault(){
   if(!players.length){setStatus('Add players first.');return;}
@@ -400,7 +484,56 @@ function applyDefault(){
   const nf={};
   players.forEach((p,i)=>{const k=keys[i];if(k&&POS[k])nf[p.id]={x:POS[k].cx,y:POS[k].cy};});
   fielders=nf;persist();renderFielders();renderFielderList();
-  setStatus('✓ '+(bowlType==='fast'?'Fast':'Spin')+' field vs '+(batHand==='rh'?'RH':'LH')+' bat applied. Drag to fine-tune.');
+  const bName=currentBowlerId?players.find(p=>p.id===currentBowlerId)?.name:'';
+  setStatus('✓ '+(bowlType==='fast'?'Fast':'Spin')+' field vs '+(batHand==='rh'?'RH':'LH')+' bat'+(bName?' for '+bName:'')+'. Drag to fine-tune.');
+}
+
+// ── PER-BOWLER FORMATIONS ─────────────────────────────────────────────────────
+// formations structure: { bowlerId: { formationName: {fielders} } }
+
+function saveFormation(){
+  if(!currentBowlerId){setStatus('Select a bowler first to save their formation.');return;}
+  const name=document.getElementById('save-name').value.trim();
+  if(!name){setStatus('Enter a formation name.');return;}
+  if(!formations[currentBowlerId]) formations[currentBowlerId]={};
+  formations[currentBowlerId][name]=JSON.parse(JSON.stringify(fielders));
+  document.getElementById('save-name').value='';
+  persist();renderSavedTags();
+  const bowlerName=players.find(p=>p.id===currentBowlerId)?.name||'';
+  setStatus('"'+name+'" saved for '+bowlerName+'.');
+}
+
+function loadFormation(name){
+  if(!currentBowlerId||!formations[currentBowlerId]||!formations[currentBowlerId][name])return;
+  fielders=JSON.parse(JSON.stringify(formations[currentBowlerId][name]));
+  persist();renderFielders();renderFielderList();
+  setStatus('"'+name+'" loaded.');
+}
+
+function deleteFormation(name){
+  if(!currentBowlerId||!formations[currentBowlerId])return;
+  delete formations[currentBowlerId][name];
+  persist();renderSavedTags();
+}
+
+function renderSavedTags(){
+  const wrap=document.getElementById('saved-tags');wrap.innerHTML='';
+  if(!currentBowlerId){
+    wrap.innerHTML='<span style="font-size:11px;color:var(--dim);">Select a bowler to see their formations.</span>';
+    return;
+  }
+  const bowlerFormations=formations[currentBowlerId]||{};
+  const keys=Object.keys(bowlerFormations);
+  if(!keys.length){
+    wrap.innerHTML='<span style="font-size:11px;color:var(--dim);">No formations saved yet.</span>';
+    return;
+  }
+  keys.forEach(name=>{
+    const tag=document.createElement('div');
+    tag.style.cssText='display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text);';
+    tag.innerHTML=`<span style="flex:1;cursor:pointer;" onclick="loadFormation('${name}')">${name}</span><button onclick="deleteFormation('${name}')" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px;padding:0 2px;" title="Delete">✕</button>`;
+    wrap.appendChild(tag);
+  });
 }
 
 // ── SVG BUILD ─────────────────────────────────────────────────────────────────
