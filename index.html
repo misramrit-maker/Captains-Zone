@@ -9,7 +9,7 @@
 <style>
 :root{--accent:#e8c84a;--accent-dark:#b89a20;--bg:#0e1e0e;--surface:#172717;--surface2:#1e341e;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.15);--text:#f0ece0;--muted:#7a9a7a;--dim:#4a6a4a;--red:#e24b4a;--r:8px;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overscroll-behavior:none;}
 header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;}
 .logo{font-family:'DM Serif Display',serif;font-size:18px;color:var(--accent);display:flex;align-items:center;gap:8px;flex:1;}
 .logo small{font-family:'DM Sans',sans-serif;font-size:11px;color:var(--muted);font-weight:400;}
@@ -32,16 +32,16 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
 .squad-count{font-size:13px;color:var(--muted);white-space:nowrap;}
 .squad-count span{color:var(--accent);font-weight:500;}
 /* Roster grid */
-.roster-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px;margin-bottom:16px;max-height:calc(100vh - 280px);overflow-y:auto;padding-right:4px;}
-.roster-card{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px 8px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .15s;user-select:none;}
+.roster-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin-bottom:16px;max-height:calc(100vh - 280px);overflow-y:auto;padding-right:4px;}
+.roster-card{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .15s;user-select:none;}
 .roster-card:hover{border-color:var(--border2);background:var(--surface2);}
-.roster-card.selected{border-color:var(--accent);background:rgba(232,200,74,0.08);}
-.roster-card.disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
-.roster-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:#fff;flex-shrink:0;transition:transform .15s;}
-.roster-card.selected .roster-avatar{transform:scale(1.1);box-shadow:0 0 0 3px rgba(232,200,74,0.4);}
-.roster-name{font-size:11px;text-align:center;color:var(--text);line-height:1.3;word-break:break-word;}
+.roster-card.selected{border-color:var(--accent);background:rgba(232,200,74,0.07);}
+.roster-card.disabled{opacity:.32;cursor:not-allowed;pointer-events:none;}
+.roster-num{width:16px;height:16px;border-radius:50%;background:var(--accent);color:#1a1a00;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.roster-num-empty{width:16px;height:16px;flex-shrink:0;}
+.roster-name{flex:1;font-size:13px;color:var(--text);line-height:1.2;}
 .roster-card.selected .roster-name{color:var(--accent);font-weight:500;}
-.roster-badge{width:16px;height:16px;border-radius:50%;background:var(--accent);color:#1a1a00;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.roster-check{font-size:11px;color:var(--accent);flex-shrink:0;font-weight:700;}
 .selected-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;min-height:36px;padding:8px;background:var(--surface);border-radius:var(--r);border:1px solid var(--border);}
 .sel-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 8px;border-radius:20px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);cursor:pointer;}
 .sel-chip:hover{border-color:var(--red);color:var(--red);}
@@ -51,7 +51,7 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
 .next-btn:hover{background:var(--accent-dark);color:#fff;}
 .next-btn:disabled{opacity:.35;cursor:not-allowed;}
 .field-page{display:flex;flex:1;overflow:hidden;}
-.field-panel{flex:1;display:flex;align-items:center;justify-content:center;padding:12px;background:var(--bg);}
+.field-panel{flex:1;display:flex;align-items:center;justify-content:center;padding:12px;background:var(--bg);touch-action:none;}
 #field-svg{width:100%;max-width:min(calc(100vh - 130px),540px);aspect-ratio:1;user-select:none;touch-action:none;filter:drop-shadow(0 0 28px rgba(42,122,42,.28));}
 .controls{width:224px;flex-shrink:0;display:flex;flex-direction:column;background:var(--surface);border-left:1px solid var(--border);overflow:hidden;}
 .ctrl-sec{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
@@ -354,15 +354,13 @@ function renderRoster(){
   filtered.forEach(r=>{
     const isSel=selected11.has(r.id);
     const isDisabled=!isSel&&selected11.size>=11;
+    const pos=isSel?([...selected11].indexOf(r.id)+1):null;
     const card=document.createElement('div');
     card.className='roster-card'+(isSel?' selected':'')+(isDisabled?' disabled':'');
-    const col=getColor(r.id);
-    const pos=isSel?([...selected11].indexOf(r.id)+1):null;
-    card.innerHTML=`
-      <div class="roster-avatar" style="background:${col}">${isSel&&pos?'<span style="font-size:11px;font-weight:700">'+pos+'</span>':initials(r.name)}</div>
-      <div class="roster-name">${r.name}</div>
-      ${isSel?'<div class="roster-badge">✓</div>':''}
-    `;
+    card.innerHTML=
+      (isSel?`<span class="roster-num">${pos}</span>`:`<span class="roster-num-empty"></span>`)+
+      `<span class="roster-name">${r.name}</span>`+
+      (isSel?`<span class="roster-check">✓</span>`:`<span class="roster-check" style="opacity:0">✓</span>`);
     if(!isDisabled) card.addEventListener('click',()=>toggleRoster(r.id));
     grid.appendChild(card);
   });
@@ -531,13 +529,18 @@ function renderFielderList(){
 }
 
 // ── DRAG ─────────────────────────────────────────────────────────────────────
-// Convert a client pixel coordinate to SVG viewBox coordinate
+// Key principle: during drag we move the SVG element directly via transform
+// rather than calling renderFielders() on every frame. This is the fix for
+// laggy touch on mobile — no DOM rebuild mid-drag.
+
 function svgPt(clientX,clientY){
   const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;
   return{x:(clientX-r.left)*(vb.width/r.width),y:(clientY-r.top)*(vb.height/r.height)};
 }
 
-// Mouse drag — listens on SVG element
+let dragEl=null; // the actual SVG <g> being dragged
+
+// Mouse
 function onMD(e){
   const g=e.target.closest('.fielder');
   if(!g){selected=null;renderFielders();return;}
@@ -547,10 +550,9 @@ function onMD(e){
   window.addEventListener('mouseup',onMU);
 }
 
-// Touch drag — listener attached directly to each fielder <g> in renderFielders()
-// Using changedTouches[0] instead of touches[0] for reliability across browsers
+// Touch — attached per-fielder in renderFielders
 function onTS(e){
-  e.preventDefault();       // block scroll and long-press menu
+  e.preventDefault();
   e.stopPropagation();
   const t=e.changedTouches[0];
   startDrag(e.currentTarget,svgPt(t.clientX,t.clientY));
@@ -562,9 +564,11 @@ function onTS(e){
 function startDrag(g,pt){
   dragging=parseInt(g.getAttribute('data-id'));
   selected=dragging;
+  dragEl=g;
   const pos=fielders[dragging];
   dragOffset={x:pos.x-pt.x,y:pos.y-pt.y};
-  renderFielders();
+  // Bring dragged element to front without full rebuild
+  g.parentNode&&g.parentNode.appendChild(g);
   setStatus('Moving '+players.find(p=>p.id===dragging)?.name+'…');
 }
 
@@ -572,18 +576,20 @@ function onMM(e){if(dragging)moveDrag(svgPt(e.clientX,e.clientY));}
 function onTM(e){
   e.preventDefault();
   if(dragging&&e.changedTouches.length){
-    const t=e.changedTouches[0];
-    moveDrag(svgPt(t.clientX,t.clientY));
+    moveDrag(svgPt(e.changedTouches[0].clientX,e.changedTouches[0].clientY));
   }
 }
 
 function moveDrag(pt){
-  if(!dragging)return;
+  if(!dragging||!dragEl)return;
   let nx=pt.x+dragOffset.x,ny=pt.y+dragOffset.y;
+  // Clamp to boundary
   const dx=nx-250,dy=ny-250,dist=Math.hypot(dx,dy);
   if(dist>218){nx=250+dx/dist*218;ny=250+dy/dist*218;}
-  fielders[dragging]={x:Math.round(nx),y:Math.round(ny)};
-  renderFielders();
+  nx=Math.round(nx);ny=Math.round(ny);
+  fielders[dragging]={x:nx,y:ny};
+  // Move the element directly — no DOM rebuild
+  dragEl.setAttribute('transform',`translate(${nx},${ny})`);
 }
 
 function onMU(){endDrag();window.removeEventListener('mousemove',onMM);window.removeEventListener('mouseup',onMU);}
@@ -596,17 +602,23 @@ function endDrag(){
   const snap=allPos.reduce((a,b)=>Math.hypot(a.cx-pos.x,a.cy-pos.y)<Math.hypot(b.cx-pos.x,b.cy-pos.y)?a:b);
   if(Math.hypot(snap.cx-pos.x,snap.cy-pos.y)<28){
     fielders[dragging]={x:snap.cx,y:snap.cy};
-    setStatus(players.find(p=>p.id===dragging)?.name+' → '+snap.name);
+    setStatus(players.find(p=>p.id===dragging)?.name+' \u2192 '+snap.name);
   }else{
     setStatus(players.find(p=>p.id===dragging)?.name+' moved.');
   }
-  dragging=null;
+  const id=dragging;
+  dragging=null;dragEl=null;
   persist();renderFielders();renderFielderList();
 }
 
 function setStatus(msg){document.getElementById('status-bar').textContent=msg;}
 
 loadData();restoreSelection();
+
+// Prevent iOS Safari from scrolling the page during any drag
+document.addEventListener('touchmove',function(e){
+  if(dragging)e.preventDefault();
+},{passive:false});
 </script>
 </body>
 </html>
