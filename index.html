@@ -74,10 +74,15 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
 .save-row button{font-family:'DM Sans',sans-serif;font-size:13px;padding:6px 10px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;flex-shrink:0;}
 .save-row button:hover{background:var(--surface2);}
 .saved-tags{padding:6px 14px 8px;display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--border);flex-shrink:0;min-height:34px;}
-.saved-tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 8px;border-radius:4px;background:var(--surface2);color:var(--muted);cursor:pointer;border:1px solid var(--border);}
-.saved-tag:hover{border-color:var(--accent);color:var(--accent);}
-.tag-x{color:var(--dim);font-size:12px;}
-.tag-x:hover{color:var(--red);}
+.formation-card{display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:6px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r);cursor:pointer;transition:all .15s;}
+.formation-card:last-child{margin-bottom:0;}
+.formation-card:hover,.formation-card.active-form{border-color:var(--accent);background:rgba(232,200,74,0.08);}
+.formation-card .fc-name{flex:1;font-size:13px;color:var(--text);font-weight:500;}
+.formation-card:hover .fc-name,.formation-card.active-form .fc-name{color:var(--accent);}
+.formation-card .fc-del{background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:2px 4px;border-radius:4px;flex-shrink:0;}
+.formation-card .fc-del:hover{color:var(--red);}
+.no-formations{font-size:12px;color:var(--dim);padding:2px 0;}
+
 #status-bar{padding:9px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);line-height:1.4;flex-shrink:0;min-height:34px;}
 .back-link{font-size:12px;color:var(--muted);cursor:pointer;padding:8px 14px;flex-shrink:0;border-top:1px solid var(--border);}
 .back-link:hover{color:var(--accent);}
@@ -98,11 +103,31 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
   </div>
 </header>
 <div class="steps">
-  <div class="step-tab active" id="tab1" onclick="goStep(1)"><div class="num">1</div>Build Squad</div>
+  <div class="step-tab active" id="tab0" onclick="goStep(0)"><div class="num"><i class="ti ti-home" style="font-size:10px;"></i></div>Formations</div>
+  <div class="step-tab" id="tab1" onclick="goStep(1)"><div class="num">1</div>Build Squad</div>
   <div class="step-tab" id="tab2"><div class="num">2</div>Set Field</div>
 </div>
 
-<div class="page active" id="page1">
+<!-- PAGE 0: HOME — all bowler formations dashboard -->
+<div class="page active" id="page0">
+  <div class="squad-wrap" style="max-width:680px;">
+    <h2>Field formations</h2>
+    <p>All saved formations by bowler. Tap any formation to jump straight to the field.</p>
+    <div id="home-formations">
+      <div style="font-size:13px;color:var(--dim);padding:16px 0;">Connecting to cloud…</div>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button onclick="goStep(1)" style="font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 20px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;flex:1;">
+        <i class="ti ti-users" style="vertical-align:-2px;margin-right:6px;"></i>Build squad
+      </button>
+      <button onclick="goStep(2)" style="font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 20px;border-radius:var(--r);border:1px solid var(--accent-dark);background:var(--accent);color:#1a1a00;font-weight:500;cursor:pointer;flex:1;">
+        <i class="ti ti-ball-cricket" style="vertical-align:-2px;margin-right:6px;"></i>Set field
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page1">
   <div class="squad-wrap">
     <h2>Pick your bowling XI</h2>
     <p>Select up to 11 players from the Athlone CC roster. Tap a card to add, tap again to remove.</p>
@@ -141,6 +166,12 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
         </select>
       </div>
 
+      <!-- SAVED FORMATIONS FOR THIS BOWLER — shown right after bowler select -->
+      <div class="ctrl-sec" id="bowler-formations-sec" style="display:none;">
+        <h3>Saved formations</h3>
+        <div id="bowler-formation-cards"></div>
+      </div>
+
       <!-- BOWLER TYPE -->
       <div class="ctrl-sec">
         <h3>Bowler type</h3>
@@ -162,19 +193,18 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
         </button>
       </div>
 
-      <!-- SAVE FORMATION FOR THIS BOWLER -->
+      <!-- SAVE FORMATION -->
       <div class="ctrl-sec">
-        <h3>Formations for this bowler</h3>
+        <h3>Save this field as…</h3>
         <input type="text" id="save-name" placeholder="Formation name…" style="width:100%;margin-bottom:7px;">
-        <button onclick="saveFormation()" style="font-family:'DM Sans',sans-serif;font-size:13px;padding:8px;border-radius:var(--r);border:1px solid var(--accent-dark);background:var(--accent);color:#1a1a00;font-weight:500;cursor:pointer;width:100%;margin-bottom:10px;">
+        <button onclick="saveFormation()" style="font-family:'DM Sans',sans-serif;font-size:13px;padding:8px;border-radius:var(--r);border:1px solid var(--accent-dark);background:var(--accent);color:#1a1a00;font-weight:500;cursor:pointer;width:100%;margin-bottom:0;">
           <i class="ti ti-device-floppy" style="vertical-align:-2px;margin-right:5px;font-size:14px;"></i>Save formation
         </button>
-        <div id="saved-tags"></div>
       </div>
 
       <div class="fielder-list" id="fielder-list"></div>
-      <div id="status-bar">Select a bowler, pick batsman type, then tap Apply.</div>
-      <div class="back-link" onclick="goStep(1)">← Edit squad</div>
+      <div id="status-bar">Select a bowler to see their saved fields.</div>
+      <div class="back-link" onclick="goStep(0)">← Back to formations</div>
     </div>
   </div>
 </div>
@@ -396,6 +426,7 @@ async function loadData(){
     fbReady=true;
     setSyncStatus('live');
     restoreSelection();
+    renderHomeFormations();
     document.getElementById('status-bar').textContent='';
 
     // Live listeners
@@ -411,6 +442,7 @@ async function loadData(){
       if(!snap.exists()) return;
       formations=snap.data();
       renderSavedTags();
+      renderHomeFormations();
     });
 
   }catch(e){
@@ -422,12 +454,81 @@ async function loadData(){
 }
 
 function goStep(n){
-  document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('active',i===n-1));
-  document.querySelectorAll('.step-tab').forEach((t,i)=>{t.classList.toggle('active',i===n-1);t.classList.toggle('done',i<n-1);});
+  document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('active',i===n));
+  document.querySelectorAll('.step-tab').forEach((t,i)=>{
+    t.classList.toggle('active',i===n);
+    t.classList.toggle('done',i<n);
+  });
+  if(n===0) renderHomeFormations();
   if(n===2){
     populateBowlerSelect();
-    buildField();renderFielders();renderFielderList();renderSavedTags();
+    buildField();renderFielders();renderFielderList();renderFormationCards();
   }
+}
+
+function renderHomeFormations(){
+  const wrap=document.getElementById('home-formations');
+  if(!wrap) return;
+  wrap.innerHTML='';
+
+  const bowlerIds=Object.keys(formations).filter(id=>Object.keys(formations[id]||{}).length>0);
+
+  if(!bowlerIds.length){
+    wrap.innerHTML='<div style="font-size:13px;color:var(--dim);padding:20px 0;text-align:center;">No formations saved yet.<br>Build your squad and set the field to get started.</div>';
+    return;
+  }
+
+  bowlerIds.forEach(bid=>{
+    const bowlerId=parseInt(bid);
+    const bowlerName=ROSTER.find(r=>r.id===bowlerId)?.name||('Player '+bowlerId);
+    const bowlerFormations=formations[bowlerId]||{};
+    const formKeys=Object.keys(bowlerFormations);
+    if(!formKeys.length) return;
+
+    const section=document.createElement('div');
+    section.style.cssText='margin-bottom:16px;';
+
+    const hdr=document.createElement('div');
+    hdr.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+    hdr.innerHTML=
+      `<div style="width:28px;height:28px;border-radius:50%;background:${getColor(bowlerId)};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;flex-shrink:0;">${initials(bowlerName)}</div>`+
+      `<span style="font-size:14px;font-weight:500;color:var(--text);">${bowlerName}</span>`+
+      `<span style="font-size:11px;color:var(--dim);">${formKeys.length} formation${formKeys.length!==1?'s':''}</span>`;
+    section.appendChild(hdr);
+
+    const grid=document.createElement('div');
+    grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:6px;';
+
+    formKeys.forEach(name=>{
+      const card=document.createElement('div');
+      card.style.cssText='display:flex;align-items:center;gap:8px;padding:9px 11px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .15s;';
+      card.innerHTML=
+        `<i class="ti ti-layout-distribute-horizontal" style="font-size:14px;color:var(--accent);flex-shrink:0;"></i>`+
+        `<span style="font-size:13px;color:var(--text);font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>`;
+      card.addEventListener('mouseenter',()=>{card.style.borderColor='var(--accent)';card.style.background='rgba(232,200,74,0.07)';});
+      card.addEventListener('mouseleave',()=>{card.style.borderColor='var(--border)';card.style.background='var(--surface)';});
+      card.addEventListener('click',()=>{
+        currentBowlerId=bowlerId;
+        activeFormationName=name;
+        fielders=JSON.parse(JSON.stringify(bowlerFormations[name]));
+        goStep(2);
+        setTimeout(()=>{
+          const sel=document.getElementById('bowler-select');
+          if(sel) sel.value=bowlerId;
+          renderFormationCards();
+          setStatus('"'+name+'" loaded for '+bowlerName+'. Drag to adjust.');
+        },50);
+      });
+      grid.appendChild(card);
+    });
+
+    section.appendChild(grid);
+    wrap.appendChild(section);
+
+    const hr=document.createElement('hr');
+    hr.style.cssText='border:none;border-top:1px solid var(--border);margin:8px 0 16px;';
+    wrap.appendChild(hr);
+  });
 }
 
 // ── ATHLONE CC ROSTER ─────────────────────────────────────────────────────────
@@ -533,22 +634,53 @@ function populateBowlerSelect(){
 function onBowlerChange(){
   const sel=document.getElementById('bowler-select');
   currentBowlerId=sel.value?parseInt(sel.value):null;
-  // Load this bowler's last used formation if one exists
+  renderFormationCards(); // show this bowler's saved formations immediately
   if(currentBowlerId){
     const bowlerFormations=formations[currentBowlerId]||{};
     const keys=Object.keys(bowlerFormations);
     if(keys.length){
-      // Load the most recently saved formation for this bowler
-      const last=keys[keys.length-1];
-      fielders=JSON.parse(JSON.stringify(bowlerFormations[last]));
-      persist();renderFielders();renderFielderList();
-      setStatus(sel.options[sel.selectedIndex].text+' selected — "'+last+'" loaded.');
+      setStatus('Tap a formation below to load it onto the field.');
     } else {
-      setStatus(sel.options[sel.selectedIndex].text+' selected. Apply a default field or drag to set up.');
+      setStatus(sel.options[sel.selectedIndex].text+' has no saved formations yet. Apply a default or drag to create one.');
     }
+  } else {
+    setStatus('Select a bowler to see their saved fields.');
   }
-  renderSavedTags();
 }
+
+let activeFormationName = null; // track which formation card is highlighted
+
+function renderFormationCards(){
+  const sec=document.getElementById('bowler-formations-sec');
+  const wrap=document.getElementById('bowler-formation-cards');
+  wrap.innerHTML='';
+
+  if(!currentBowlerId){sec.style.display='none';return;}
+
+  const bowlerFormations=formations[currentBowlerId]||{};
+  const keys=Object.keys(bowlerFormations);
+
+  sec.style.display='block';
+
+  if(!keys.length){
+    wrap.innerHTML='<div class="no-formations">No formations saved yet.</div>';
+    return;
+  }
+
+  keys.forEach(name=>{
+    const card=document.createElement('div');
+    card.className='formation-card'+(activeFormationName===name?' active-form':'');
+    card.innerHTML=
+      `<i class="ti ti-layout-distribute-horizontal" style="font-size:15px;color:var(--accent);flex-shrink:0;"></i>`+
+      `<span class="fc-name">${name}</span>`+
+      `<button class="fc-del" title="Delete" onclick="event.stopPropagation();deleteFormation('${name}')">✕</button>`;
+    card.addEventListener('click',()=>loadFormation(name));
+    wrap.appendChild(card);
+  });
+}
+
+// Keep renderSavedTags as an alias so Firebase listener still works
+function renderSavedTags(){ renderFormationCards(); }
 
 function setBowl(v){
   bowlType=v;
@@ -584,45 +716,29 @@ async function saveFormation(){
   if(!formations[currentBowlerId]) formations[currentBowlerId]={};
   formations[currentBowlerId][name]=JSON.parse(JSON.stringify(fielders));
   document.getElementById('save-name').value='';
+  activeFormationName=name;
   await persistFormations();
-  renderSavedTags();
+  renderFormationCards();
   const bowlerName=players.find(p=>p.id===currentBowlerId)?.name||'';
   setStatus('"'+name+'" saved for '+bowlerName+'.');
 }
 
 function loadFormation(name){
   if(!currentBowlerId||!formations[currentBowlerId]||!formations[currentBowlerId][name])return;
+  activeFormationName=name;
   fielders=JSON.parse(JSON.stringify(formations[currentBowlerId][name]));
-  persist();renderFielders();renderFielderList();
-  setStatus('"'+name+'" loaded.');
+  persist();renderFielders();renderFielderList();renderFormationCards();
+  setStatus('"'+name+'" loaded. Drag to adjust.');
 }
 
 async function deleteFormation(name){
   if(!currentBowlerId||!formations[currentBowlerId])return;
   delete formations[currentBowlerId][name];
+  if(activeFormationName===name) activeFormationName=null;
   await persistFormations();
-  renderSavedTags();
+  renderFormationCards();
 }
 
-function renderSavedTags(){
-  const wrap=document.getElementById('saved-tags');wrap.innerHTML='';
-  if(!currentBowlerId){
-    wrap.innerHTML='<span style="font-size:11px;color:var(--dim);">Select a bowler to see their formations.</span>';
-    return;
-  }
-  const bowlerFormations=formations[currentBowlerId]||{};
-  const keys=Object.keys(bowlerFormations);
-  if(!keys.length){
-    wrap.innerHTML='<span style="font-size:11px;color:var(--dim);">No formations saved yet.</span>';
-    return;
-  }
-  keys.forEach(name=>{
-    const tag=document.createElement('div');
-    tag.style.cssText='display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text);';
-    tag.innerHTML=`<span style="flex:1;cursor:pointer;" onclick="loadFormation('${name}')">${name}</span><button onclick="deleteFormation('${name}')" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px;padding:0 2px;" title="Delete">✕</button>`;
-    wrap.appendChild(tag);
-  });
-}
 
 // ── SVG BUILD ─────────────────────────────────────────────────────────────────
 function mksvg(tag,attrs,text){
@@ -849,7 +965,22 @@ function setSyncStatus(state){
 
 function setStatus(msg){document.getElementById('status-bar').textContent=msg;}
 
-loadData(); // async — loads from Firestore, falls back to localStorage
+// ── EXPOSE FUNCTIONS CALLED FROM HTML onclick ATTRIBUTES ─────────────────────
+// type="module" scopes everything to the module — onclick= attributes can't
+// find functions unless they are explicitly attached to window.
+window.goStep         = goStep;
+window.toggleRoster   = toggleRoster;
+window.renderRoster   = renderRoster;
+window.setBowl        = setBowl;
+window.setBat         = setBat;
+window.applyDefault   = applyDefault;
+window.onBowlerChange = onBowlerChange;
+window.saveFormation  = saveFormation;
+window.loadFormation  = loadFormation;
+window.deleteFormation= deleteFormation;
+window.renderFormationCards=renderFormationCards;
+
+loadData(); // async — loads from Firestore, shows home page once ready
 
 // Save formation on Enter key
 document.getElementById('save-name').addEventListener('keydown',e=>{if(e.key==='Enter')saveFormation();});
