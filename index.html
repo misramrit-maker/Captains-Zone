@@ -22,24 +22,31 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
 .step-tab.done .num{background:var(--dim);color:var(--text);}
 .page{display:none;flex:1;flex-direction:column;}
 .page.active{display:flex;}
-.squad-wrap{max-width:540px;margin:0 auto;padding:24px 18px;width:100%;}
+.squad-wrap{max-width:700px;margin:0 auto;padding:20px 18px;width:100%;}
 .squad-wrap h2{font-family:'DM Serif Display',serif;font-size:22px;color:var(--accent);margin-bottom:4px;}
-.squad-wrap p{font-size:13px;color:var(--muted);margin-bottom:20px;}
-.player-input-row{display:flex;gap:8px;margin-bottom:10px;}
-input[type=text]{font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text);outline:none;transition:border-color .15s;width:100%;}
-input[type=text]:focus{border-color:var(--accent);}
-input[type=text]::placeholder{color:var(--dim);}
-.add-btn{font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 14px;border-radius:var(--r);border:1px solid var(--accent-dark);background:var(--accent);color:#1a1a00;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;}
-.add-btn:hover{background:var(--accent-dark);color:#fff;}
-.squad-count{font-size:12px;color:var(--muted);margin-bottom:10px;}
+.squad-wrap p{font-size:13px;color:var(--muted);margin-bottom:14px;}
+.squad-top{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+.search-box{flex:1;min-width:160px;font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text);outline:none;}
+.search-box:focus{border-color:var(--accent);}
+.search-box::placeholder{color:var(--dim);}
+.squad-count{font-size:13px;color:var(--muted);white-space:nowrap;}
 .squad-count span{color:var(--accent);font-weight:500;}
-.squad-list{display:flex;flex-direction:column;gap:6px;margin-bottom:20px;}
-.squad-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);}
-.squad-num{font-size:12px;color:var(--dim);width:18px;text-align:right;flex-shrink:0;}
-.squad-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:#fff;flex-shrink:0;}
-.squad-name{flex:1;font-size:14px;}
-.squad-del{background:none;border:none;cursor:pointer;color:var(--dim);font-size:16px;padding:2px 5px;border-radius:4px;}
-.squad-del:hover{color:var(--red);}
+/* Roster grid */
+.roster-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px;margin-bottom:16px;max-height:calc(100vh - 280px);overflow-y:auto;padding-right:4px;}
+.roster-card{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px 8px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .15s;user-select:none;}
+.roster-card:hover{border-color:var(--border2);background:var(--surface2);}
+.roster-card.selected{border-color:var(--accent);background:rgba(232,200,74,0.08);}
+.roster-card.disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
+.roster-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:#fff;flex-shrink:0;transition:transform .15s;}
+.roster-card.selected .roster-avatar{transform:scale(1.1);box-shadow:0 0 0 3px rgba(232,200,74,0.4);}
+.roster-name{font-size:11px;text-align:center;color:var(--text);line-height:1.3;word-break:break-word;}
+.roster-card.selected .roster-name{color:var(--accent);font-weight:500;}
+.roster-badge{width:16px;height:16px;border-radius:50%;background:var(--accent);color:#1a1a00;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.selected-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;min-height:36px;padding:8px;background:var(--surface);border-radius:var(--r);border:1px solid var(--border);}
+.sel-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 8px;border-radius:20px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);cursor:pointer;}
+.sel-chip:hover{border-color:var(--red);color:var(--red);}
+.sel-chip .chip-x{color:var(--dim);font-size:11px;}
+.sel-empty{font-size:12px;color:var(--dim);align-self:center;}
 .next-btn{font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 24px;border-radius:var(--r);border:1px solid var(--accent-dark);background:var(--accent);color:#1a1a00;font-weight:500;cursor:pointer;width:100%;transition:all .15s;}
 .next-btn:hover{background:var(--accent-dark);color:#fff;}
 .next-btn:disabled{opacity:.35;cursor:not-allowed;}
@@ -62,7 +69,8 @@ input[type=text]::placeholder{color:var(--dim);}
 .f-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
 .f-pos{font-size:10px;color:var(--muted);text-align:right;flex-shrink:0;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .save-row{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
-.save-row input{flex:1;min-width:0;font-size:12px;padding:6px 9px;}
+.save-row input[type=text],.ctrl-sec input[type=text]{font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 9px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text);outline:none;width:100%;}
+.save-row input[type=text]:focus,.ctrl-sec input[type=text]:focus{border-color:var(--accent);}
 .save-row button{font-family:'DM Sans',sans-serif;font-size:13px;padding:6px 10px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;flex-shrink:0;}
 .save-row button:hover{background:var(--surface2);}
 .saved-tags{padding:6px 14px 8px;display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--border);flex-shrink:0;min-height:34px;}
@@ -89,15 +97,25 @@ input[type=text]::placeholder{color:var(--dim);}
 
 <div class="page active" id="page1">
   <div class="squad-wrap">
-    <h2>Your bowling squad</h2>
-    <p>Add up to 11 players. Press Enter or click Add.</p>
-    <div class="player-input-row">
-      <input type="text" id="player-input" placeholder="Player name…" maxlength="24">
-      <button class="add-btn" onclick="addPlayer()"><i class="ti ti-plus" style="vertical-align:-2px;"></i> Add</button>
+    <h2>Pick your bowling XI</h2>
+    <p>Select up to 11 players from the Athlone CC roster. Tap a card to add, tap again to remove.</p>
+
+    <div class="squad-top">
+      <input class="search-box" id="search-box" placeholder="Search player…" oninput="renderRoster()">
+      <div class="squad-count">Selected: <span id="sel-count">0</span> / 11</div>
     </div>
-    <div class="squad-count">Players: <span id="count">0</span> / 11</div>
-    <div class="squad-list" id="squad-list"></div>
-    <button class="next-btn" id="next-btn" onclick="goStep(2)" disabled>Set the field <i class="ti ti-arrow-right" style="vertical-align:-2px;margin-left:4px;"></i></button>
+
+    <!-- Selected chips strip -->
+    <div class="selected-strip" id="selected-strip">
+      <span class="sel-empty">No players selected yet</span>
+    </div>
+
+    <!-- Full roster grid -->
+    <div class="roster-grid" id="roster-grid"></div>
+
+    <button class="next-btn" id="next-btn" onclick="goStep(2)" disabled>
+      Set the field <i class="ti ti-arrow-right" style="vertical-align:-2px;margin-left:4px;"></i>
+    </button>
   </div>
 </div>
 
@@ -140,71 +158,71 @@ function getColor(id){return COLORS[(id-1)%COLORS.length];}
 function initials(n){return n.trim().split(/\s+/).map(w=>w[0]).join('').substring(0,2).toUpperCase();}
 
 // ─────────────────────────────────────────────────────────────────────────────
-// COORDINATE SYSTEM
-// SVG 500×500. Field boundary ≈ radius 222 from centre (250,250).
-// BATSMAN at (250, 300) — striker's crease.
-// BOWLER runs in from TOP of SVG (y decreases = toward bowler).
+// COORDINATE SYSTEM — corrected
+// SVG 500×500. Field boundary = circle r=222 from centre (250,250).
+// BATSMAN at (250,295) — striker's crease.
+// BOWLER delivers from TOP (small y). Batsman faces up.
 //
-// polar(angleDeg, distFrac):
-//   angleDeg 0   = straight behind batsman (up the SVG, toward fine leg/3rd man zone)
-//   angleDeg +90 = square OFF side  (right of SVG for RH batsman)
-//   angleDeg -90 = square LEG side  (left of SVG for RH batsman)
-//   angleDeg 180 = straight in FRONT (down the SVG, long-on/long-off direction)
-//   distFrac     = fraction of 212 (boundary distance from batsman)
+// polar(deg, frac):
+//   deg  0   = BEHIND batsman (down SVG, +y direction) → WK / slips / fine leg
+//   deg +90  = square OFF side (right of SVG for RH bat)
+//   deg -90  = square LEG side (left of SVG for RH bat)
+//   deg 180  = IN FRONT / toward bowler (up SVG, −y) → mid-off, long-on etc
+//   frac     = fraction of 205px (approx boundary distance from batsman)
+//   Result clamped so no fielder lands outside the boundary circle.
 // ─────────────────────────────────────────────────────────────────────────────
-const BAT={x:250,y:300};
+const BAT={x:250,y:295};
 function polar(deg,frac){
-  const r=deg*Math.PI/180,d=frac*212;
-  return{cx:Math.round(BAT.x+Math.sin(r)*d),cy:Math.round(BAT.y-Math.cos(r)*d)};
+  const r=deg*Math.PI/180, d=frac*205;
+  let cx=BAT.x+Math.sin(r)*d, cy=BAT.y+Math.cos(r)*d;
+  // Clamp to boundary (r=218 gives a small margin inside the painted ellipse)
+  const dist=Math.hypot(cx-250,cy-250);
+  if(dist>218){const s=218/dist;cx=250+(cx-250)*s;cy=250+(cy-250)*s;}
+  return{cx:Math.round(cx),cy:Math.round(cy)};
 }
 
-// ALL POSITIONS — defined for RIGHT-HAND batsman
-// Off side = positive angle (right of SVG). Leg side = negative angle (left).
+// ALL NAMED POSITIONS for a RIGHT-HAND batsman.
+// Verified: none land on the pitch (x=241–259, y=193–308) and all are inside boundary.
 const RH={
-  // ── BEHIND WICKET (slips arc, off side) ──────────────────────────────────
-  wk:       {...polar(5,   0.12), name:'Wicket Keeper'},   // just off-side, close
-  slip1:    {...polar(17,  0.15), name:'First Slip'},
-  slip2:    {...polar(27,  0.19), name:'Second Slip'},
-  slip3:    {...polar(36,  0.23), name:'Third Slip'},
-  gully:    {...polar(52,  0.24), name:'Gully'},           // squarer, wider than slip
+  // ── BEHIND (deg 0 = down SVG) ────────────────────────────────────────────
+  wk:       {...polar(3,   0.15), name:'Wicket Keeper'},  // (252,326) straight behind, close
+  slip1:    {...polar(18,  0.24), name:'First Slip'},     // (265,342) off side
+  slip2:    {...polar(30,  0.31), name:'Second Slip'},    // (282,350)
+  slip3:    {...polar(40,  0.38), name:'Third Slip'},     // (300,355)
+  gully:    {...polar(57,  0.34), name:'Gully'},          // (308,333) wide of slips
 
-  // ── IN FRONT — OFF SIDE ──────────────────────────────────────────────────
-  // Square = 90°, cover = ~55°, extra cover = ~40°, mid-off = ~20° from straight
-  point:    {...polar(90,  0.47), name:'Point'},
-  coverPt:  {...polar(68,  0.50), name:'Cover Point'},
-  cover:    {...polar(54,  0.52), name:'Cover'},
-  extraCvr: {...polar(40,  0.53), name:'Extra Cover'},
-  midOff:   {...polar(22,  0.53), name:'Mid Off'},
+  // Fine/third man — deep behind, near boundary
+  thirdMan: {...polar(28,  0.99), name:'Third Man'},      // (335,451) off side boundary
+  fineLeg:  {...polar(-28, 0.99), name:'Fine Leg'},       // (165,451) leg side boundary
 
-  // ── IN FRONT — LEG SIDE ──────────────────────────────────────────────────
-  midOn:    {...polar(-22, 0.53), name:'Mid On'},
-  midWkt:   {...polar(-54, 0.52), name:'Mid Wicket'},
-  sqLeg:    {...polar(-90, 0.47), name:'Square Leg'},
-  fwdSqLeg: {...polar(-68, 0.44), name:'Forward Sq Leg'},
+  // ── SQUARE (roughly perpendicular to pitch) ───────────────────────────────
+  point:    {...polar(98,  0.47), name:'Point'},          // (345,282) off side square
+  sqLeg:    {...polar(-98, 0.47), name:'Square Leg'},     // (155,282) leg side square
 
-  // ── CLOSE CATCHERS ────────────────────────────────────────────────────────
-  shortLeg: {...polar(-50, 0.18), name:'Short Leg'},       // leg side, bat-pad
-  sillyMid: {...polar(-26, 0.14), name:'Silly Mid On'},    // very close, leg side
-  sillyPt:  {...polar(50,  0.16), name:'Silly Point'},     // very close, off side
+  // ── IN FRONT (deg 180 = up SVG toward bowler) ────────────────────────────
+  coverPt:  {...polar(132, 0.47), name:'Cover Point'},    // (322,231) off 45°
+  cover:    {...polar(146, 0.50), name:'Cover'},          // (307,210)
+  extraCvr: {...polar(158, 0.52), name:'Extra Cover'},    // (290,196)
+  midOff:   {...polar(168, 0.55), name:'Mid Off'},        // (273,185) near straight, off
+  midOn:    {...polar(-168,0.55), name:'Mid On'},         // (227,185) near straight, leg
+  midWkt:   {...polar(-146,0.50), name:'Mid Wicket'},     // (193,210)
+  fwdSqLeg: {...polar(-130,0.46), name:'Forward Sq Leg'},// (178,234)
 
-  // ── BOUNDARY — BEHIND WICKET ─────────────────────────────────────────────
-  // Third man: fine behind, off side boundary (~20°)
-  // Fine leg: fine behind, leg side boundary (~-20°)
-  // These are near boundary but NOT at straight — they're in the fine region
-  thirdMan: {...polar(22,  0.93), name:'Third Man'},
-  fineLeg:  {...polar(-22, 0.93), name:'Fine Leg'},
+  // ── CLOSE CATCHERS (beside pitch, not on it) ──────────────────────────────
+  shortLeg: {...polar(-125,0.20), name:'Short Leg'},      // (216,271) leg side, beside pitch
+  sillyPt:  {...polar(125, 0.18), name:'Silly Point'},    // (280,274) off side, beside pitch
+  sillyMid: {...polar(-158,0.16), name:'Silly Mid On'},   // (238,265) in front leg, very close
 
-  // ── BOUNDARY — IN FRONT ──────────────────────────────────────────────────
-  // Long off/on: ~15-20° off straight, at boundary
-  longOff:  {...polar(17,  0.95), name:'Long Off'},
-  longOn:   {...polar(-17, 0.95), name:'Long On'},
-  deepCV:   {...polar(58,  0.93), name:'Deep Cover'},
-  deepPt:   {...polar(85,  0.91), name:'Deep Point'},
-  deepMW:   {...polar(-58, 0.93), name:'Deep Mid Wicket'},
-  deepSL:   {...polar(-85, 0.91), name:'Deep Square Leg'},
+  // ── DEEP BOUNDARY IN FRONT ───────────────────────────────────────────────
+  longOff:  {...polar(172, 0.99), name:'Long Off'},       // (278, 94)
+  longOn:   {...polar(-172,0.99), name:'Long On'},        // (222, 94)
+  deepCV:   {...polar(146, 0.99), name:'Deep Cover'},     // (363,127)
+  deepPt:   {...polar(108, 0.99), name:'Deep Point'},     // (443,232)
+  deepMW:   {...polar(-146,0.99), name:'Deep Mid Wicket'},// (137,127)
+  deepSL:   {...polar(-108,0.99), name:'Deep Square Leg'},// ( 57,232)
 };
 
-// Build LH positions: mirror x (500-cx), swap off/leg labels
+// LH batsman: mirror all x coords, swap off/leg position names
 const LH_NAME_MAP={
   'Wicket Keeper':'Wicket Keeper',
   'First Slip':'First Slip','Second Slip':'Second Slip','Third Slip':'Third Slip',
@@ -223,54 +241,44 @@ const LH=Object.fromEntries(Object.entries(RH).map(([k,v])=>[k,{cx:500-v.cx,cy:v
 function getPOS(h){return h==='rh'?RH:LH;}
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DEFAULT FIELD PLACEMENTS
-// Order: player index → position key
-// Player 0 = WK (always), then 9 fielders + 1 bowler (bowler is just another fielder)
+// DEFAULT FIELD PLACEMENTS (verified: no pitch collisions, realistic spacing)
 // ─────────────────────────────────────────────────────────────────────────────
 const DEFAULTS={
   fast:{
-    // Classic seam attack for RH bat:
-    // WK back, 2 slips, gully, point, cover, mid-off, mid-on, fine leg, third man, sq-leg
+    // Classic seam/swing attack: WK back, 2 slips, gully, point, cover, mid-off, mid-on, sq-leg, fine leg, third man
     rh:['wk','slip1','slip2','gully','point','cover','midOff','midOn','sqLeg','fineLeg','thirdMan'],
-    // For LH bat the slips/gully still go to the new off side (mirrored automatically)
     lh:['wk','slip1','slip2','gully','point','cover','midOff','midOn','sqLeg','fineLeg','thirdMan'],
   },
   spin:{
-    // Spin attack for RH bat:
-    // WK up close, slip, silly point, short leg, cover, mid-off, mid-on, mid-wicket, sq-leg, fine leg, 3rd man
+    // Spin attack: WK up, slip, silly point, short leg, cover, mid-off, mid-on, mid-wicket, sq-leg, fine leg, third man
     rh:['wk','slip1','sillyPt','shortLeg','cover','midOff','midOn','midWkt','sqLeg','fineLeg','thirdMan'],
-    // Spin vs LH bat: slip to new off side, silly mid-on (now off side for LH), short leg
     lh:['wk','slip1','sillyMid','shortLeg','cover','midOff','midOn','midWkt','sqLeg','fineLeg','thirdMan'],
   },
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GUIDE LABELS painted on the field grass (faint, for reference)
-// Defined as polar coords relative to batsman, mirrored for LH
+// GUIDE LABELS — positions painted on the grass for reference
+// Using same polar() so they stay consistent with fielder coordinates
 // ─────────────────────────────────────────────────────────────────────────────
 const GUIDES=[
-  // Behind wicket
-  {rh:'Third Man',  a:26,  f:0.72},{rh:'Fine Leg',   a:-26, f:0.72},
-  // Square
-  {rh:'Point',      a:90,  f:0.55},{rh:'Square Leg', a:-90, f:0.55},
-  // 45° off
-  {rh:'Cover',      a:55,  f:0.62},{rh:'Mid Wicket', a:-55, f:0.62},
-  // Straight
-  {rh:'Mid Off',    a:24,  f:0.62},{rh:'Mid On',     a:-24, f:0.62},
-  // Deep straight
-  {rh:'Long Off',   a:20,  f:0.84},{rh:'Long On',    a:-20, f:0.84},
-  // Deep square
-  {rh:'Deep Point', a:86,  f:0.86},{rh:'Deep S. Leg',a:-86, f:0.86},
-  // Close catchers region (label only, no fielder always here)
-  {rh:'Gully',      a:54,  f:0.28},
+  {rh:'Fine Leg',   a:-28, f:0.72},
+  {rh:'Third Man',  a:28,  f:0.72},
+  {rh:'Sq Leg',     a:-98, f:0.55},
+  {rh:'Point',      a:98,  f:0.55},
+  {rh:'Mid Wicket', a:-146,f:0.60},
+  {rh:'Cover',      a:146, f:0.60},
+  {rh:'Mid On',     a:-168,f:0.60},
+  {rh:'Mid Off',    a:168, f:0.60},
+  {rh:'Long On',    a:-172,f:0.85},
+  {rh:'Long Off',   a:172, f:0.85},
+  {rh:'Gully',      a:57,  f:0.26},
 ];
 const GUIDE_LH_NAME={
-  'Third Man':'Fine Leg','Fine Leg':'Third Man',
-  'Point':'Square Leg','Square Leg':'Point',
-  'Cover':'Mid Wicket','Mid Wicket':'Cover',
-  'Mid Off':'Mid On','Mid On':'Mid Off',
-  'Long Off':'Long On','Long On':'Long Off',
-  'Deep Point':'Deep S. Leg','Deep S. Leg':'Deep Point',
+  'Fine Leg':'Third Man','Third Man':'Fine Leg',
+  'Sq Leg':'Point','Point':'Sq Leg',
+  'Mid Wicket':'Cover','Cover':'Mid Wicket',
+  'Mid On':'Mid Off','Mid Off':'Mid On',
+  'Long On':'Long Off','Long Off':'Long On',
   'Gully':'Leg Gully',
 };
 
@@ -297,24 +305,91 @@ function goStep(n){
   if(n===2){buildField();renderFielders();renderFielderList();renderSavedTags();}
 }
 
-// ── SQUAD ─────────────────────────────────────────────────────────────────────
-function addPlayer(){
-  const inp=document.getElementById('player-input'),name=inp.value.trim();if(!name)return;
-  if(players.length>=11){setStatus('Squad full — 11 players max.');return;}
-  players.push({id:nextId++,name});inp.value='';inp.focus();persist();renderSquad();
+// ── ATHLONE CC ROSTER ─────────────────────────────────────────────────────────
+const ROSTER=[
+  'Amrit','Keith','Saqib','Sushant','Naveenkumar','Taha','Karan','Vignesh',
+  'Yash','Himanshu','Vibin','Supriya','Rhys','Nikhil','Akshay','Priyesh',
+  'Santhosh','Avanish','Paras','Syed Ahtisham','Indraneel','Gaurav',
+  'Naveenrohith','Manu','Arjun','Amal','Hriday','Garva','Mashal','Anjan',
+  'Surya','Bhargav','Sujeet','Rakesh','Eldhose','Deepan','Sandita','Rupin',
+  'Poonam','Deepti','Vaishali','Renee','Ridhi','Chandana','Nikita','Penny',
+  'Nethra','Sunitha','Lalitha','Gopi','Priyanka','Salim','Ragul','Harsh',
+  'Danyal','Jawwad','Edward','Chetan','Sid','Kapila',
+].map((name,i)=>({id:i+1,name}));
+
+// selected = Set of roster IDs in the XI
+let selected11=new Set();
+
+function toggleRoster(id){
+  if(selected11.has(id)){selected11.delete(id);}
+  else{if(selected11.size>=11)return;selected11.add(id);}
+  // Sync players array from selection (preserve order added)
+  syncPlayers();
+  renderRoster();
+  renderSelectedStrip();
+  updateSelCount();
 }
-function removePlayer(id){players=players.filter(p=>p.id!==id);delete fielders[id];persist();renderSquad();}
-function renderSquad(){
-  const list=document.getElementById('squad-list');list.innerHTML='';
-  players.forEach((p,i)=>{
-    const row=document.createElement('div');row.className='squad-item';
-    row.innerHTML=`<span class="squad-num">${i+1}</span><div class="squad-avatar" style="background:${getColor(p.id)}">${initials(p.name)}</div><span class="squad-name">${p.name}</span><button class="squad-del" onclick="removePlayer(${p.id})" title="Remove"><i class="ti ti-x"></i></button>`;
-    list.appendChild(row);
+
+function syncPlayers(){
+  // Build ordered players from selected11, preserving existing order
+  const existing=players.map(p=>p.id);
+  // Add newly selected (not yet in players)
+  selected11.forEach(id=>{
+    if(!existing.includes(id)){
+      const r=ROSTER.find(x=>x.id===id);
+      if(r) players.push({id:r.id,name:r.name});
+    }
   });
-  document.getElementById('count').textContent=players.length;
-  document.getElementById('next-btn').disabled=players.length<1;
+  // Remove deselected
+  players=players.filter(p=>selected11.has(p.id));
+  // Reassign display nextId (not used for roster but keep consistent)
+  nextId=ROSTER.length+1;
+  persist();
 }
-document.getElementById('player-input').addEventListener('keydown',e=>{if(e.key==='Enter')addPlayer();});
+
+function renderRoster(){
+  const q=(document.getElementById('search-box').value||'').toLowerCase().trim();
+  const grid=document.getElementById('roster-grid');grid.innerHTML='';
+  const filtered=ROSTER.filter(r=>!q||r.name.toLowerCase().includes(q));
+  filtered.forEach(r=>{
+    const isSel=selected11.has(r.id);
+    const isDisabled=!isSel&&selected11.size>=11;
+    const card=document.createElement('div');
+    card.className='roster-card'+(isSel?' selected':'')+(isDisabled?' disabled':'');
+    const col=getColor(r.id);
+    const pos=isSel?([...selected11].indexOf(r.id)+1):null;
+    card.innerHTML=`
+      <div class="roster-avatar" style="background:${col}">${isSel&&pos?'<span style="font-size:11px;font-weight:700">'+pos+'</span>':initials(r.name)}</div>
+      <div class="roster-name">${r.name}</div>
+      ${isSel?'<div class="roster-badge">✓</div>':''}
+    `;
+    if(!isDisabled) card.addEventListener('click',()=>toggleRoster(r.id));
+    grid.appendChild(card);
+  });
+  if(filtered.length===0) grid.innerHTML='<div style="grid-column:1/-1;font-size:13px;color:var(--dim);padding:16px 0;">No players match your search.</div>';
+}
+
+function renderSelectedStrip(){
+  const strip=document.getElementById('selected-strip');strip.innerHTML='';
+  if(selected11.size===0){strip.innerHTML='<span class="sel-empty">No players selected yet</span>';return;}
+  players.forEach((p,i)=>{
+    const chip=document.createElement('span');chip.className='sel-chip';
+    chip.innerHTML=`<span style="background:${getColor(p.id)};width:14px;height:14px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:600">${i+1}</span>${p.name}<span class="chip-x">✕</span>`;
+    chip.addEventListener('click',()=>toggleRoster(p.id));
+    strip.appendChild(chip);
+  });
+}
+
+function updateSelCount(){
+  document.getElementById('sel-count').textContent=selected11.size;
+  document.getElementById('next-btn').disabled=selected11.size<1;
+}
+
+// Restore selection from saved players on load
+function restoreSelection(){
+  selected11=new Set(players.map(p=>p.id));
+  renderRoster();renderSelectedStrip();updateSelCount();
+}
 
 // ── CONTROLS ──────────────────────────────────────────────────────────────────
 function setBowl(v){bowlType=v;document.getElementById('bowl-fast').classList.toggle('active',v==='fast');document.getElementById('bowl-spin').classList.toggle('active',v==='spin');}
@@ -356,59 +431,205 @@ function buildField(){
   svg.appendChild(mksvg('text',{x:legX,y:254,'font-size':'8',fill:'rgba(255,255,255,.14)','text-anchor':'middle','font-family':'DM Sans,sans-serif','font-style':'italic'},'leg side'));
 
   // ── PITCH ──────────────────────────────────────────────────────────────────
-  // 22 yards long. Our field radius ≈ 70m → pitch half = 10m → 10/70×222≈32px each side of centre
-  // So pitch from y=218 to y=282? Actually batsman crease at y=300, bowler end at y≈193.
-  // Let's use real look: pitch rect from y=193 to y=300 (batsman crease), with buffer above
-  svg.appendChild(mksvg('rect',{x:242,y:193,width:16,height:107,rx:2,fill:'#c8a96e',stroke:'#a88848','stroke-width':'1.5'}));
-
-  // Popping crease at batsman end (y=300) and bowling end (y=207 approx)
-  const BOWL_CREASE_Y=207,BAT_CREASE_Y=300;
+  // Pitch runs from bowler end (top, y≈193) to batsman crease (y≈295)
+  // Batsman faces UP (toward bowler). Behind batsman = DOWN (higher y).
+  svg.appendChild(mksvg('rect',{x:242,y:193,width:16,height:102,rx:2,fill:'#c8a96e',stroke:'#a88848','stroke-width':'1.5'}));
+  // Creases
+  const BAT_CREASE_Y=295, BOWL_CREASE_Y=207;
   svg.appendChild(mksvg('line',{x1:236,x2:264,y1:BAT_CREASE_Y,y2:BAT_CREASE_Y,stroke:'rgba(255,255,255,.65)','stroke-width':'1.5'}));
   svg.appendChild(mksvg('line',{x1:236,x2:264,y1:BOWL_CREASE_Y,y2:BOWL_CREASE_Y,stroke:'rgba(255,255,255,.65)','stroke-width':'1.5'}));
-
   // Stumps at both ends
-  const STUMP_SETS=[{y:193,bails:true},{y:300,bails:false}];
-  STUMP_SETS.forEach(({y,bails})=>{
+  [{y:193},{y:295}].forEach(({y})=>{
     [-3,0,3].forEach(dx=>svg.appendChild(mksvg('rect',{x:250+dx-1,y:y-9,width:2,height:18,fill:'#f5e6c8',rx:1})));
-    if(bails)svg.appendChild(mksvg('line',{x1:244,x2:256,y1:y-9,y2:y-9,stroke:'#f5e6c8','stroke-width':'1.5'}));
+    svg.appendChild(mksvg('line',{x1:244,x2:256,y1:y-9,y2:y-9,stroke:'#f5e6c8','stroke-width':'1.5'}));
   });
-
-  // Batsman marker (small dot on striker's crease)
-  svg.appendChild(mksvg('circle',{cx:250,cy:BAT.y,r:3,fill:'rgba(255,255,255,0.5)',stroke:'#a88848','stroke-width':'1'}));
-
-  // Bowling end direction
-  svg.appendChild(mksvg('text',{x:250,y:164,'font-size':'8',fill:'rgba(255,255,255,.16)','text-anchor':'middle','font-family':'DM Sans,sans-serif'},'▼ bowling end'));
+  // Batsman marker dot on striker's crease
+  svg.appendChild(mksvg('circle',{cx:250,cy:BAT.y,r:3,fill:'rgba(255,255,255,0.45)',stroke:'#a88848','stroke-width':'1'}));
+  // Bowling end label (top of SVG)
+  svg.appendChild(mksvg('text',{x:250,y:164,'font-size':'8',fill:'rgba(255,255,255,.18)','text-anchor':'middle','font-family':'DM Sans,sans-serif'},'▼ bowling end'));
 
   // ── GUIDE LABELS on the grass ──────────────────────────────────────────────
+  // Each label gets a dark semi-transparent pill background so it reads clearly on green
   GUIDES.forEach(({rh:rhLabel,a,f})=>{
     const ang=batHand==='lh'?-a:a;
     const txt=batHand==='lh'?(GUIDE_LH_NAME[rhLabel]||rhLabel):rhLabel;
     const p=polar(ang,f);
-    // Skip if label lands on the pitch area
-    if(Math.abs(p.cx-250)<18&&p.cy>185&&p.cy<310)return;
+    // Skip if on or very near the pitch
+    if(Math.abs(p.cx-250)<20&&p.cy>185&&p.cy<315)return;
     // Skip if outside boundary
-    if(Math.hypot(p.cx-250,p.cy-250)>210)return;
-    svg.appendChild(mksvg('text',{x:p.cx,y:p.cy,'font-size':'7.5',fill:'rgba(255,255,255,.17)','text-anchor':'middle','font-family':'DM Sans,sans-serif'},txt));
+    if(Math.hypot(p.cx-250,p.cy-250)>215)return;
+
+    const pw=txt.length*4.8+10, ph=12;
+    svg.appendChild(mksvg('rect',{
+      x:p.cx-pw/2, y:p.cy-ph+2,
+      width:pw, height:ph, rx:'4',
+      fill:'rgba(0,0,0,0.55)',
+    }));
+    svg.appendChild(mksvg('text',{
+      x:p.cx, y:p.cy,
+      'font-size':'7.5', fill:'rgba(255,255,255,0.85)',
+      'text-anchor':'middle', 'font-family':'DM Sans,sans-serif', 'font-weight':'500',
+    },txt));
   });
 
   // Fielder group (always last = on top)
   svg.appendChild(mksvg('g',{id:'fl'}));
+  // mousedown on SVG for click-to-deselect and mouse drag
   svg.addEventListener('mousedown',onMD);
-  svg.addEventListener('touchstart',onTS,{passive:false});
+  // touchstart is attached per-fielder in renderFielders() for instant drag without scroll
 }
 
-// ── RENDER FIELDERS ───────────────────────────────────────────────────────────
+// ── RENDER FIELDERS — 3D professional player figures ──────────────────────────
+function ensureDefs(){
+  let defs=svg.querySelector('defs');
+  if(defs) return defs;
+  defs=mksvg('defs');
+  svg.insertBefore(defs,svg.firstChild);
+  return defs;
+}
+
+function ensurePlayerGradients(color,id){
+  const defs=ensureDefs();
+  const gid='pg'+id, sid='ps'+id, kid='pk'+id;
+  if(defs.querySelector('#'+gid)) return;
+
+  // Lighten colour for highlight
+  function lighten(hex,amt){
+    let c=parseInt(hex.replace('#',''),16);
+    let r=Math.min(255,((c>>16)&255)+amt);
+    let g=Math.min(255,((c>>8)&255)+amt);
+    let b=Math.min(255,(c&255)+amt);
+    return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+  }
+  function darken(hex,amt){return lighten(hex,-amt);}
+  const light=lighten(color,70), dark=darken(color,40);
+
+  // Jersey radial gradient (3D sphere-like)
+  const jerseyGrad=mksvg('radialGradient',{id:gid,cx:'38%',cy:'30%',r:'65%','fx':'38%','fy':'30%'});
+  jerseyGrad.appendChild(mksvg('stop',{'offset':'0%','stop-color':light,'stop-opacity':'1'}));
+  jerseyGrad.appendChild(mksvg('stop',{'offset':'55%','stop-color':color,'stop-opacity':'1'}));
+  jerseyGrad.appendChild(mksvg('stop',{'offset':'100%','stop-color':dark,'stop-opacity':'1'}));
+  defs.appendChild(jerseyGrad);
+
+  // Head radial gradient (skin tone shaded)
+  const headGrad=mksvg('radialGradient',{id:sid,cx:'40%',cy:'32%',r:'60%'});
+  headGrad.appendChild(mksvg('stop',{'offset':'0%','stop-color':'#f5d5b0'}));
+  headGrad.appendChild(mksvg('stop',{'offset':'100%','stop-color':'#c8955a'}));
+  defs.appendChild(headGrad);
+
+  // Helmet gradient (white helmet)
+  const helmGrad=mksvg('radialGradient',{id:kid,cx:'35%',cy:'28%',r:'65%'});
+  helmGrad.appendChild(mksvg('stop',{'offset':'0%','stop-color':'#ffffff'}));
+  helmGrad.appendChild(mksvg('stop',{'offset':'100%','stop-color':'#aaaaaa'}));
+  defs.appendChild(helmGrad);
+}
+
+function ensureSharedDefs(){
+  const defs=ensureDefs();
+  if(defs.querySelector('#dropshadow')) return;
+
+  // Drop shadow filter
+  const filter=mksvg('filter',{id:'dropshadow',x:'-30%',y:'-20%',width:'160%',height:'160%'});
+  const fe1=mksvg('feDropShadow',{dx:'0',dy:'3',stdDeviation:'2.5','flood-color':'rgba(0,0,0,0.55)','flood-opacity':'1'});
+  filter.appendChild(fe1);
+  defs.appendChild(filter);
+
+  // Selection glow filter
+  const glow=mksvg('filter',{id:'selglow',x:'-40%',y:'-40%',width:'180%',height:'180%'});
+  const feBlur=mksvg('feGaussianBlur',{in:'SourceGraphic',stdDeviation:'3',result:'blur'});
+  const feMerge=mksvg('feMerge');
+  const n1=mksvg('feMergeNode',{in:'blur'});
+  const n2=mksvg('feMergeNode',{in:'SourceGraphic'});
+  feMerge.appendChild(n1); feMerge.appendChild(n2);
+  glow.appendChild(feBlur); glow.appendChild(feMerge);
+  defs.appendChild(glow);
+}
+
 function renderFielders(){
   const layer=svg.getElementById('fl');if(!layer)return;layer.innerHTML='';
+  ensureSharedDefs();
+
   Object.entries(fielders).forEach(([pid,pos])=>{
-    pid=parseInt(pid);const p=players.find(x=>x.id===pid);if(!p)return;
-    const color=getColor(pid),isSel=selected===pid;
-    const g=mksvg('g',{'class':'fielder','data-id':pid,cursor:'grab',transform:`translate(${pos.x},${pos.y})`});
-    if(isSel)g.appendChild(mksvg('circle',{r:'19',fill:'none',stroke:'#e8c84a','stroke-width':'2','stroke-dasharray':'4,3'}));
-    g.appendChild(mksvg('circle',{r:'14',fill:color,stroke:'rgba(0,0,0,.4)','stroke-width':'1.5'}));
-    g.appendChild(mksvg('text',{'text-anchor':'middle','dominant-baseline':'central','font-size':'8.5','font-weight':'500',fill:'rgba(255,255,255,.95)','font-family':'DM Sans,sans-serif'},initials(p.name)));
-    const sn=p.name.length>10?p.name.substring(0,9)+'…':p.name;
-    g.appendChild(mksvg('text',{'text-anchor':'middle',y:'24','font-size':'7.5',fill:'rgba(255,255,255,.85)','font-family':'DM Sans,sans-serif'},sn));
+    pid=parseInt(pid);
+    const p=players.find(x=>x.id===pid);if(!p)return;
+    const color=getColor(pid), isSel=selected===pid, isDrag=dragging===pid;
+
+    ensurePlayerGradients(color,pid);
+    const gid='pg'+pid, sid='ps'+pid, kid='pk'+pid;
+
+    const g=mksvg('g',{
+      'class':'fielder','data-id':pid,
+      cursor:isDrag?'grabbing':'grab',
+      transform:`translate(${pos.x},${pos.y})`,
+      filter:'url(#dropshadow)',
+    });
+
+    // ── Ground shadow (oval under feet)
+    g.appendChild(mksvg('ellipse',{cx:'0',cy:'14',rx:'11',ry:'4',fill:'rgba(0,0,0,0.35)'}));
+
+    // ── Selection ring (pulsing dashed gold halo)
+    if(isSel){
+      const halo=mksvg('circle',{r:'22',fill:'none',stroke:'#e8c84a','stroke-width':'2.5','stroke-dasharray':'5,3'});
+      g.appendChild(halo);
+    }
+
+    // ── BODY / JERSEY
+    // Torso: rounded rectangle shape via path
+    // Body from y=2 to y=14, width ~14
+    g.appendChild(mksvg('path',{
+      d:'M -7,2 Q -8,-2 0,-3 Q 8,-2 7,2 L 8,14 Q 0,16 -8,14 Z',
+      fill:`url(#${gid})`,
+      stroke:'rgba(0,0,0,0.3)','stroke-width':'0.5'
+    }));
+
+    // Jersey number / kit stripe (horizontal stripe on chest)
+    g.appendChild(mksvg('line',{x1:'-7',y1:'4',x2:'7',y2:'4',stroke:'rgba(255,255,255,0.25)','stroke-width':'1.2'}));
+
+    // Arms (left and right)
+    g.appendChild(mksvg('path',{d:'M -7,3 Q -12,6 -10,11',stroke:`url(#${gid})`,'stroke-width':'4','stroke-linecap':'round',fill:'none'}));
+    g.appendChild(mksvg('path',{d:'M 7,3 Q 12,6 10,11',stroke:`url(#${gid})`,'stroke-width':'4','stroke-linecap':'round',fill:'none'}));
+
+    // Gloves / hands (small circles at arm ends)
+    g.appendChild(mksvg('circle',{cx:'-10',cy:'11',r:'2.5',fill:'#f5d5b0',stroke:'rgba(0,0,0,.25)','stroke-width':'0.5'}));
+    g.appendChild(mksvg('circle',{cx:'10',cy:'11',r:'2.5',fill:'#f5d5b0',stroke:'rgba(0,0,0,.25)','stroke-width':'0.5'}));
+
+    // Legs
+    g.appendChild(mksvg('path',{d:'M -3,13 L -4,19 L -2,19',stroke:'#ffffff','stroke-width':'3.5','stroke-linecap':'round','stroke-linejoin':'round',fill:'none','stroke-opacity':'0.9'}));
+    g.appendChild(mksvg('path',{d:'M 3,13 L 4,19 L 2,19',stroke:'#ffffff','stroke-width':'3.5','stroke-linecap':'round','stroke-linejoin':'round',fill:'none','stroke-opacity':'0.9'}));
+
+    // ── NECK
+    g.appendChild(mksvg('rect',{x:'-2.5',y:'-6',width:'5',height:'5',rx:'1',fill:'#c8955a'}));
+
+    // ── HEAD (face)
+    g.appendChild(mksvg('circle',{cx:'0',cy:'-11',r:'7.5',fill:`url(#${sid})`,stroke:'rgba(0,0,0,0.3)','stroke-width':'0.5'}));
+
+    // ── HELMET
+    // Dome
+    g.appendChild(mksvg('path',{
+      d:'M -7,-11 Q -7,-21 0,-22 Q 7,-21 7,-11 Z',
+      fill:`url(#${kid})`,stroke:'rgba(0,0,0,0.3)','stroke-width':'0.5'
+    }));
+    // Visor / peak (small rectangle jutting out from front)
+    const vx=color; // visor matches jersey colour
+    g.appendChild(mksvg('rect',{x:'-8',y:'-14',width:'16',height:'3',rx:'1',fill:`url(#${gid})`,stroke:'rgba(0,0,0,0.2)','stroke-width':'0.4'}));
+    // Helmet grill lines (face guard)
+    g.appendChild(mksvg('line',{x1:'-5',y1:'-11',x2:'-5',y2:'-7',stroke:'rgba(0,0,0,0.35)','stroke-width':'0.8'}));
+    g.appendChild(mksvg('line',{x1:'-3',y1:'-12',x2:'-3',y2:'-7',stroke:'rgba(0,0,0,0.35)','stroke-width':'0.8'}));
+    g.appendChild(mksvg('line',{x1:'-1',y1:'-12',x2:'-1',y2:'-7',stroke:'rgba(0,0,0,0.35)','stroke-width':'0.8'}));
+    g.appendChild(mksvg('line',{x1:'1',y1:'-12',x2:'1',y2:'-7',stroke:'rgba(0,0,0,0.35)','stroke-width':'0.8'}));
+    g.appendChild(mksvg('line',{x1:'3',y1:'-12',x2:'3',y2:'-7',stroke:'rgba(0,0,0,0.35)','stroke-width':'0.8'}));
+    g.appendChild(mksvg('line',{x1:'5',y1:'-11',x2:'5',y2:'-7',stroke:'rgba(0,0,0,0.35)','stroke-width':'0.8'}));
+    // Horizontal bar across grill
+    g.appendChild(mksvg('line',{x1:'-5',y1:'-9',x2:'5',y2:'-9',stroke:'rgba(0,0,0,0.35)','stroke-width':'0.8'}));
+
+    // ── NAME LABEL below figure
+    const sn=p.name.split(' ')[0]; // first name only
+    const label=mksvg('text',{'text-anchor':'middle',y:'28','font-size':'7','font-weight':'500',fill:'rgba(255,255,255,0.92)','font-family':'DM Sans,sans-serif','paint-order':'stroke','stroke':'rgba(0,0,0,0.7)','stroke-width':'2.5','stroke-linejoin':'round'});
+    label.textContent=sn.length>9?sn.substring(0,8)+'…':sn;
+    g.appendChild(label);
+
+    // Touch drag
+    g.addEventListener('touchstart',onTS,{passive:false});
     layer.appendChild(g);
   });
 }
@@ -428,27 +649,65 @@ function renderFielderList(){
   });
 }
 
-// ── DRAG ──────────────────────────────────────────────────────────────────────
+// ── DRAG — pick up and move immediately, no pre-selection needed ───────────────
 function svgPt(e){
   const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;
   const sx=vb.width/r.width,sy=vb.height/r.height;
-  const cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY;
-  return{x:(cx-r.left)*sx,y:(cy-r.top)*sy};
+  const src=e.touches?e.touches[0]:e;
+  return{x:(src.clientX-r.left)*sx,y:(src.clientY-r.top)*sy};
 }
-function onMD(e){const g=e.target.closest('.fielder');if(g){e.preventDefault();startDrag(g,svgPt(e));window.addEventListener('mousemove',onMM);window.addEventListener('mouseup',onMU);}else{selected=null;renderFielders();}}
-function onTS(e){const g=e.target.closest('.fielder');if(g){e.preventDefault();startDrag(g,svgPt(e));window.addEventListener('touchmove',onTM,{passive:false});window.addEventListener('touchend',onTE);}}
-function startDrag(g,pt){dragging=parseInt(g.getAttribute('data-id'));selected=dragging;const pos=fielders[dragging];dragOffset={x:pos.x-pt.x,y:pos.y-pt.y};renderFielders();setStatus('Moving '+players.find(p=>p.id===dragging)?.name+'…');}
+
+// Mouse
+function onMD(e){
+  const g=e.target.closest('.fielder');
+  if(g){
+    e.preventDefault();
+    e.stopPropagation();
+    startDrag(g,svgPt(e));
+    window.addEventListener('mousemove',onMM);
+    window.addEventListener('mouseup',onMU);
+  }else{
+    selected=null;renderFielders();
+  }
+}
+
+// Touch — attached directly to each fielder element so no hit-test needed
+function onTS(e){
+  // e.currentTarget is the fielder <g> element
+  e.preventDefault();
+  e.stopPropagation();
+  startDrag(e.currentTarget, svgPt(e));
+  window.addEventListener('touchmove',onTM,{passive:false});
+  window.addEventListener('touchend',onTE);
+}
+
+function startDrag(g,pt){
+  dragging=parseInt(g.getAttribute('data-id'));
+  selected=dragging;
+  const pos=fielders[dragging];
+  dragOffset={x:pos.x-pt.x,y:pos.y-pt.y};
+  // Show grabbing cursor immediately
+  g.setAttribute('cursor','grabbing');
+  renderFielders();
+  setStatus('Moving '+players.find(p=>p.id===dragging)?.name+'…');
+}
+
 function onMM(e){if(dragging)moveDrag(svgPt(e));}
 function onTM(e){e.preventDefault();if(dragging)moveDrag(svgPt(e));}
+
 function moveDrag(pt){
   if(!dragging)return;
   let nx=pt.x+dragOffset.x,ny=pt.y+dragOffset.y;
+  // Clamp inside boundary
   const dx=nx-250,dy=ny-250,dist=Math.hypot(dx,dy);
   if(dist>218){nx=250+dx/dist*218;ny=250+dy/dist*218;}
-  fielders[dragging]={x:Math.round(nx),y:Math.round(ny)};renderFielders();
+  fielders[dragging]={x:Math.round(nx),y:Math.round(ny)};
+  renderFielders();
 }
+
 function onMU(){endDrag();window.removeEventListener('mousemove',onMM);window.removeEventListener('mouseup',onMU);}
 function onTE(){endDrag();window.removeEventListener('touchmove',onTM);window.removeEventListener('touchend',onTE);}
+
 function endDrag(){
   if(!dragging)return;
   const pos=fielders[dragging];
@@ -457,8 +716,11 @@ function endDrag(){
   if(Math.hypot(snap.cx-pos.x,snap.cy-pos.y)<28){
     fielders[dragging]={x:snap.cx,y:snap.cy};
     setStatus(players.find(p=>p.id===dragging)?.name+' → '+snap.name);
-  }else setStatus(players.find(p=>p.id===dragging)?.name+' repositioned.');
-  dragging=null;persist();renderFielders();renderFielderList();
+  }else{
+    setStatus(players.find(p=>p.id===dragging)?.name+' repositioned.');
+  }
+  dragging=null;
+  persist();renderFielders();renderFielderList();
 }
 
 // ── FORMATIONS ────────────────────────────────────────────────────────────────
@@ -482,7 +744,7 @@ function renderSavedTags(){
 }
 function setStatus(msg){document.getElementById('status-bar').textContent=msg;}
 
-loadData();renderSquad();
+loadData();restoreSelection();
 </script>
 </body>
 </html>
