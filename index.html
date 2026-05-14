@@ -103,8 +103,8 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
   </div>
 </header>
 <div class="steps">
-  <div class="step-tab active" id="tab0" onclick="goStep(0)"><div class="num"><i class="ti ti-home" style="font-size:10px;"></i></div>Formations</div>
-  <div class="step-tab" id="tab1" onclick="goStep(1)"><div class="num">1</div>Build Squad</div>
+  <div class="step-tab active" id="tab0"><div class="num"><i class="ti ti-home" style="font-size:10px;"></i></div>Formations</div>
+  <div class="step-tab" id="tab1"><div class="num">1</div>Build Squad</div>
   <div class="step-tab" id="tab2"><div class="num">2</div>Set Field</div>
 </div>
 
@@ -117,10 +117,10 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
       <div style="font-size:13px;color:var(--dim);padding:16px 0;">Connecting to cloud…</div>
     </div>
     <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
-      <button onclick="goStep(1)" style="font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 20px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;flex:1;">
+      <button id="btn-go-squad" style="font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 20px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;flex:1;">
         <i class="ti ti-users" style="vertical-align:-2px;margin-right:6px;"></i>Build squad
       </button>
-      <button onclick="goStep(2)" style="font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 20px;border-radius:var(--r);border:1px solid var(--accent-dark);background:var(--accent);color:#1a1a00;font-weight:500;cursor:pointer;flex:1;">
+      <button id="btn-go-field" style="font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 20px;border-radius:var(--r);border:1px solid var(--accent-dark);background:var(--accent);color:#1a1a00;font-weight:500;cursor:pointer;flex:1;">
         <i class="ti ti-ball-cricket" style="vertical-align:-2px;margin-right:6px;"></i>Set field
       </button>
     </div>
@@ -133,7 +133,7 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
     <p>Select up to 11 players from the Athlone CC roster. Tap a card to add, tap again to remove.</p>
 
     <div class="squad-top">
-      <input class="search-box" id="search-box" placeholder="Search player…" oninput="renderRoster()">
+      <input class="search-box" id="search-box" placeholder="Search player…">
       <div class="squad-count">Selected: <span id="sel-count">0</span> / 11</div>
     </div>
 
@@ -145,7 +145,7 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
     <!-- Full roster grid -->
     <div class="roster-grid" id="roster-grid"></div>
 
-    <button class="next-btn" id="next-btn" onclick="goStep(2)" disabled>
+    <button class="next-btn" id="next-btn" id="next-btn" disabled>
       Set the field <i class="ti ti-arrow-right" style="vertical-align:-2px;margin-left:4px;"></i>
     </button>
   </div>
@@ -161,7 +161,7 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
       <!-- BOWLER SELECT -->
       <div class="ctrl-sec">
         <h3>Bowler</h3>
-        <select id="bowler-select" onchange="onBowlerChange()" style="width:100%;font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 9px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text);outline:none;">
+        <select id="bowler-select" style="width:100%;font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 9px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--text);outline:none;">
           <option value="">— select bowler —</option>
         </select>
       </div>
@@ -176,8 +176,8 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
       <div class="ctrl-sec">
         <h3>Bowler type</h3>
         <div class="seg">
-          <button class="seg-btn active" id="bowl-fast" onclick="setBowl('fast')">Fast</button>
-          <button class="seg-btn" id="bowl-spin" onclick="setBowl('spin')">Spin</button>
+          <button class="seg-btn active" id="bowl-fast">Fast</button>
+          <button class="seg-btn" id="bowl-spin">Spin</button>
         </div>
       </div>
 
@@ -185,10 +185,10 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
       <div class="ctrl-sec">
         <h3>Batsman</h3>
         <div class="seg">
-          <button class="seg-btn active" id="bat-rh" onclick="setBat('rh')">Right hand</button>
-          <button class="seg-btn" id="bat-lh" onclick="setBat('lh')">Left hand</button>
+          <button class="seg-btn active" id="bat-rh">Right hand</button>
+          <button class="seg-btn" id="bat-lh">Left hand</button>
         </div>
-        <button class="apply-btn" onclick="applyDefault()">
+        <button class="apply-btn" id="btn-apply">
           <i class="ti ti-layout-grid" style="vertical-align:-2px;margin-right:4px;font-size:14px;"></i>Apply default field
         </button>
       </div>
@@ -197,14 +197,14 @@ header{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var
       <div class="ctrl-sec">
         <h3>Save this field as…</h3>
         <input type="text" id="save-name" placeholder="Formation name…" style="width:100%;margin-bottom:7px;">
-        <button onclick="saveFormation()" style="font-family:'DM Sans',sans-serif;font-size:13px;padding:8px;border-radius:var(--r);border:1px solid var(--accent-dark);background:var(--accent);color:#1a1a00;font-weight:500;cursor:pointer;width:100%;margin-bottom:0;">
+        <button id="btn-save" style="font-family:'DM Sans',sans-serif;font-size:13px;padding:8px;border-radius:var(--r);border:1px solid var(--accent-dark);background:var(--accent);color:#1a1a00;font-weight:500;cursor:pointer;width:100%;margin-bottom:0;">
           <i class="ti ti-device-floppy" style="vertical-align:-2px;margin-right:5px;font-size:14px;"></i>Save formation
         </button>
       </div>
 
       <div class="fielder-list" id="fielder-list"></div>
       <div id="status-bar">Select a bowler to see their saved fields.</div>
-      <div class="back-link" onclick="goStep(0)">← Back to formations</div>
+      <div class="back-link" id="btn-back">← Back to formations</div>
     </div>
   </div>
 </div>
@@ -1024,31 +1024,46 @@ function setSyncStatus(state){
 
 function setStatus(msg){document.getElementById('status-bar').textContent=msg;}
 
-// ── EXPOSE FUNCTIONS CALLED FROM HTML onclick ATTRIBUTES ─────────────────────
-// type="module" scopes everything to the module — onclick= attributes can't
-// find functions unless they are explicitly attached to window.
-window.goStep         = goStep;
-window.toggleRoster   = toggleRoster;
-window.renderRoster   = renderRoster;
-window.setBowl        = setBowl;
-window.setBat         = setBat;
-window.applyDefault   = applyDefault;
-window.onBowlerChange = onBowlerChange;
-window.saveFormation  = saveFormation;
-window.resaveFormation= resaveFormation;
-window.loadFormation  = loadFormation;
-window.deleteFormation= deleteFormation;
-window.renderFormationCards=renderFormationCards;
+// Functions called from dynamically-generated innerHTML must stay on window
+window.deleteFormation = deleteFormation;
+window.resaveFormation = resaveFormation;
+window.toggleRoster    = toggleRoster;
 
-loadData(); // async — loads from Firestore, shows home page once ready
+// ── WIRE UP ALL BUTTON EVENTS ONCE DOM IS READY ───────────────────────────────
+// Using addEventListener instead of onclick= so type="module" scoping is not an issue.
+document.addEventListener('DOMContentLoaded', () => {
+  // Step tabs
+  document.getElementById('tab0')?.addEventListener('click', ()=>goStep(0));
+  document.getElementById('tab1')?.addEventListener('click', ()=>goStep(1));
+  document.getElementById('tab2')?.addEventListener('click', ()=>goStep(2));
 
-// Save formation on Enter key
-document.getElementById('save-name').addEventListener('keydown',e=>{if(e.key==='Enter')saveFormation();});
+  // Home page buttons
+  document.getElementById('btn-go-squad')?.addEventListener('click', ()=>goStep(1));
+  document.getElementById('btn-go-field')?.addEventListener('click', ()=>goStep(2));
 
-// Prevent iOS Safari from scrolling the page during any drag
-document.addEventListener('touchmove',function(e){
-  if(dragging)e.preventDefault();
-},{passive:false});
+  // Squad page
+  document.getElementById('next-btn')?.addEventListener('click', ()=>goStep(2));
+  document.getElementById('search-box')?.addEventListener('input', renderRoster);
+
+  // Field page
+  document.getElementById('bowl-fast')?.addEventListener('click', ()=>setBowl('fast'));
+  document.getElementById('bowl-spin')?.addEventListener('click', ()=>setBowl('spin'));
+  document.getElementById('bat-rh')?.addEventListener('click',   ()=>setBat('rh'));
+  document.getElementById('bat-lh')?.addEventListener('click',   ()=>setBat('lh'));
+  document.getElementById('btn-apply')?.addEventListener('click', applyDefault);
+  document.getElementById('btn-save')?.addEventListener('click',  saveFormation);
+  document.getElementById('btn-back')?.addEventListener('click',  ()=>goStep(0));
+  document.getElementById('bowler-select')?.addEventListener('change', onBowlerChange);
+
+  // Save on Enter
+  document.getElementById('save-name')?.addEventListener('keydown', e=>{ if(e.key==='Enter') saveFormation(); });
+
+  // Prevent iOS Safari scrolling during drag
+  document.addEventListener('touchmove', e=>{ if(dragging) e.preventDefault(); }, {passive:false});
+
+  // Boot
+  loadData();
+});
 </script>
 </body>
 </html>
